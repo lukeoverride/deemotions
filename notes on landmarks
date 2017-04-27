@@ -1,0 +1,13 @@
+0-16 face edge
+17-21 left eyebrow
+22-26 right eyebrow
+27-30 nasal bridge from the top to the bottom
+31-35 points under the nose
+36-41 left eye clockwise
+42-47 right eye clockwise
+48-59 outer edge mouth
+60-67 inner edge month
+
+*left and right are considered with respect to the observer of the picture
+
+mean point between 0 and 36, mean point between 16 and 45 points can be used to have the width of the face; 8,(19+x pixel) to have the heigth
