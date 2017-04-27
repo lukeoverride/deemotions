@@ -1,22 +1,22 @@
 import numpy as np
-import os
+import glob,os
 import cv2
 import sys
-def noisy(noise_typ,image):
-	if noise_typ == "gauss":
-		row,col= image.shape
-		mean = 0
-		var = 14
-		#sigma = var**0.5
-		gauss = np.random.normal(mean,var,(row,col))
-		gauss = gauss.reshape(row,col)
-		noisy = image + gauss
-		noisy = np.clip(noisy,0,255)
-		
-		return noisy.astype(np.uint8)
-#do it for all images in the dir
-img = cv2.imread(sys.argv[1]+".png",0)
-imgMod = noisy('gauss',img)
-cv2.imshow('image',imgMod)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+def noisy(noise_value,image):
+	row,col,ch= image.shape
+	mean = 0
+	var = noise_value
+	gauss = np.random.normal(mean,var,(row,col,ch))
+	gauss = gauss.reshape(row,col,ch)
+	noisy = image + gauss
+	noisy = np.clip(noisy,0,255)
+	return noisy.astype(np.uint8)
+
+os.chdir(sys.argv[1])
+for file in glob.glob("*.png"):
+	fileNoExtension = file[0:len(file)-4];
+	img = cv2.imread(file)
+	imgNoised7 = noisy(7,img)
+	imgNoised14 = noisy(14,img)
+	cv2.imwrite(fileNoExtension+"_noised1.png",imgNoised7)
+	cv2.imwrite(fileNoExtension+"_noised2.png",imgNoised14)

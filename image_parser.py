@@ -46,29 +46,25 @@ def create_csv(input_path, label_path, output_path):
 
     #Iterate through all the folder specified in the input path
     #per ogni immagine, splitta il nome e prenditi i valori di persona e seq number, vai nella cartella appropriata, apri il file e prendi il valore dell'emozione
-        for image_path in glob.glob(input_path+"*.png"):
-
-            splitted = image_path.split('/')
-            image_name = splitted[len(splitted)-1]
-            image_no_extension = image_name[0:len(image_name)-4];
-            splitted = image_name.split('_')
-            if (len(splitted) == 4):
-				image_no_extension = image_name[0:len(image_name)-12];
-            person_id = splitted[0][1:len(splitted[0])];
-            seq_n = splitted[1]
-			noised = 0;
-            if (len(splitted) == 4):
-				noised = 1;
-			#RETRIEVE HERE THE EMOTION FILE ASSOCIATED
-            emotion = int(np.loadtxt(label_path+"S"+person_id+"/"+seq_n+"/"+image_no_extension+"_emotion.txt", unpack=True))
-            
-            #Write the CSV file
-            #e' meglio se la output dir sia assoluta e non relativa, quindi partendo dalla root
-            fd = open(input_path + '/prima_label.csv','a')
-            fd.write(image_path + "," + str(int(person_id)) + "," + str(int(seq_n)) + "," + str(emotion) + "," + str(int(noised)) + "\n")
-            fd.close()
-
-            counter += 1
+    for image_path in glob.glob(input_path+"*.png"):
+        splitted = image_path.split('/')
+        image_name = splitted[len(splitted)-1]
+        image_no_extension = image_name[0:len(image_name)-4];
+        splitted = image_name.split('_')
+        if (len(splitted) == 4):
+            image_no_extension = image_name[0:len(image_name)-12];
+        person_id = splitted[0][1:len(splitted[0])];
+        seq_n = splitted[1]
+        noised = 0;
+        if (len(splitted) == 4):
+            noised = 1;
+        #RETRIEVE HERE THE EMOTION FILE ASSOCIATED
+        emotion = int(np.loadtxt(label_path+"S"+person_id+"/"+seq_n+"/"+image_no_extension+"_emotion.txt", unpack=True))
+        #Write the CSV file
+        fd = open(input_path + '/prima_label.csv','a')
+        fd.write(image_path + "," + str(int(person_id)) + "," + str(int(seq_n)) + "," + str(emotion) + "," + str(int(noised)) + "\n")
+        fd.close()
+        counter += 1
 
 ##
 # Generate a pickle file containing Numpy arrays ready to use for
@@ -104,115 +100,115 @@ def create_loo_pickle(csv_path, output_path, shuffle=False):
     
     #per ogni persona
     for i in range(1,118):
-    	
-    		
-    		#local variable clered at ech cycle
-		    training_list = list()
-		    training_emotion_list = list()
-		    training_noised_list = list()
-		    
-		    valid_list = list()
-		    valid_emotion_list = list()
-		    valid_noised_list = list()
+        
+            
+            #local variable clered at ech cycle
+            training_list = list()
+            training_emotion_list = list()
+            training_noised_list = list()
+            
+            valid_list = list()
+            valid_emotion_list = list()
+            valid_noised_list = list()
 
-		    test_list = list()
-		    test_emotion_list = list()
-		    test_noised_list = list()
-		    
-		    row_counter = 0
-		    insertedInTraining = 0
-		    
-		    for person_id in person_id_vector:
-		        #Check if the image exists
-		        if os.path.isfile(image_list[row_counter]):
-		            image = cv2.imread(str(image_list[row_counter])) #colour
-		            img_h, img_w, img_d = image.shape
-		        else:
-		            print("The image do not exist: " + image_list[row_counter])
-		            raise ValueError('Error: the image file do not exist.')
-	 
-		        #Separate test and training sets     
-		        #FARE IN MODO CHE PRENDO SOLO LE IMMAGINI ORIGINALI E NON QUELLE RUMOROSE PER IL TEST SET     
-		        if(int(person_id) == i && noised_vector[row_counter] == 0): #if it is not noised 
-		             test_list.append(image)
-		             test_emotion_list.append(emotion_vector[row_counter])
-		             test_noised_list.append(noised_vector[row_counter])
-		        else:
-		        #900 training set, 78 validation set, selected ramdomly
-		        	 r = random.uniform(0,1)
-		        	 if (r < 0.9 && insertedInTraining < 900):
-				     	training_list.append(image)         
-				     	training_emotion_list.append(emotion_vector[row_counter])
-				     	training_noised_list.append(noised_vector[row_counter])
-				     	insertedInTraining += 1;
-				     else
-				     	valid_list.append(image)
-				     	valid_emotion_list.append(emotion_vector[row_counter])
-				     	valid_noised_list.append(noised_vector[row_counter])
-				     #mi serve anche tenermi l'informazione sul numero di seq e noised value?
-		        row_counter += 1
-		    
-
-        #Create arrays
-        training_array = np.asarray(training_list)
-        training_emotion_array = np.asarray(training_emotion_list) 
-        training_noised_array = np.asarray(training_noised_list)
-    
-        test_array = np.asarray(test_list)
-        test_emotion_array = np.asarray(test_emotion_list) 
-        test_noised_array = np.asarray(test_noised_list) 
-
-        training_array = np.reshape(training_array, (-1, img_h*img_w*img_d))
-        training_emotion_array = np.reshape(training_emotion_array, (-1, 1)) 
-        training_noised_array = np.reshape(training_noised_array, (-1, 1))
+            test_list = list()
+            test_emotion_list = list()
+            test_noised_list = list()
+            
+            row_counter = 0
+            insertedInTraining = 0
+            
+            for person_id in person_id_vector:
+                #Check if the image exists
+                if os.path.isfile(image_list[row_counter]):
+                    image = cv2.imread(str(image_list[row_counter])) #colour
+                    img_h, img_w, img_d = image.shape
+                else:
+                    print("The image do not exist: " + image_list[row_counter])
+                    raise ValueError('Error: the image file do not exist.')
      
-        test_array = np.reshape(test_array, (-1, img_h*img_w*img_d)) 
-        test_emotion_array = np.reshape(test_emotion_array, (-1, 1)) 
-        test_noised_array = np.reshape(test_noised_array, (-1, 1)) 
+                #Separate test and training sets     
+                #FARE IN MODO CHE PRENDO SOLO LE IMMAGINI ORIGINALI E NON QUELLE RUMOROSE PER IL TEST SET     
+                if(int(person_id) == i and noised_vector[row_counter] == 0): #if it is not noised 
+                     test_list.append(image)
+                     test_emotion_list.append(emotion_vector[row_counter])
+                     test_noised_list.append(noised_vector[row_counter])
+                else:
+                #900 training set, 78 validation set, selected ramdomly
+                     r = random.uniform(0,1)
+                     if (r < 0.9 and insertedInTraining < 900):
+                         training_list.append(image)         
+                         training_emotion_list.append(emotion_vector[row_counter])
+                         training_noised_list.append(noised_vector[row_counter])
+                         insertedInTraining += 1;
+                     else:
+                         valid_list.append(image)
+                         valid_emotion_list.append(emotion_vector[row_counter])
+                         valid_noised_list.append(noised_vector[row_counter])
+                     #mi serve anche tenermi l'informazione sul numero di seq e noised value?
+                row_counter += 1
+            
 
-        print("Training dataset: ", training_array.shape)
-        print("Training emotion label: ", training_emotion_array.shape)
-        print("Training noised label: ", training_emotion_array.shape)
-        print("Test dataset: ", test_array.shape)
-        print("Test emotion label: ", test_emotion_array.shape)
-        print("Test noised label: ", test_noised_array.shape)
+            #Create arrays
+            training_array = np.asarray(training_list)
+            training_emotion_array = np.asarray(training_emotion_list) 
+            training_noised_array = np.asarray(training_noised_list)
+        
+            test_array = np.asarray(test_list)
+            test_emotion_array = np.asarray(test_emotion_list) 
+            test_noised_array = np.asarray(test_noised_list) 
 
-        #saving the dataset in a pickle file
-        pickle_file = output_path + "/prima_p" + str(i) + "_out.pickle"
-        print("Saving the dataset in: " + pickle_file)
-        print("... ")
-        try:
-             print("Opening the file...")
-             f = open(pickle_file, 'wb')
-             save = {
-               'training_dataset': training_array,
-               'training_emotion_label': training_emotion_array,
-               'training_noised_label': training_noised_array,    
-               'test_dataset': test_array,
-               'test_emotion_label': test_emotion_array,
-               'test_noised_label': test_noised_array   
-               # aggiungere salvataggio valid set 
-                   }
+            training_array = np.reshape(training_array, (-1, img_h*img_w*img_d))
+            training_emotion_array = np.reshape(training_emotion_array, (-1, 1)) 
+            training_noised_array = np.reshape(training_noised_array, (-1, 1))
+         
+            test_array = np.reshape(test_array, (-1, img_h*img_w*img_d)) 
+            test_emotion_array = np.reshape(test_emotion_array, (-1, 1)) 
+            test_noised_array = np.reshape(test_noised_array, (-1, 1)) 
 
-             print("Training dataset: ", training_array.shape)
-             print("Training emotion label: ", training_emotion_array.shape)
-             print("Training noised label: ", training_noised_array.shape)
-             print("Test dataset: ", test_array.shape)
-             print("Test emotion label: ", test_emotion_array.shape)
-             print("Test noised label: ", test_noised_array.shape)
+            print("Training dataset: ", training_array.shape)
+            print("Training emotion label: ", training_emotion_array.shape)
+            print("Training noised label: ", training_emotion_array.shape)
+            print("Test dataset: ", test_array.shape)
+            print("Test emotion label: ", test_emotion_array.shape)
+            print("Test noised label: ", test_noised_array.shape)
 
-             print("Saving the file...")
-             pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
-             print("Closing the file...")
-             f.close()
+            #saving the dataset in a pickle file
+            pickle_file = output_path + "/prima_p" + str(i) + "_out.pickle"
+            print("Saving the dataset in: " + pickle_file)
+            print("... ")
+            try:
+                 print("Opening the file...")
+                 f = open(pickle_file, 'wb')
+                 save = {
+                   'training_dataset': training_array,
+                   'training_emotion_label': training_emotion_array,
+                   'training_noised_label': training_noised_array,    
+                   'test_dataset': test_array,
+                   'test_emotion_label': test_emotion_array,
+                   'test_noised_label': test_noised_array   
+                   # aggiungere salvataggio valid set 
+                       }
 
-             print("")
-             print("The dataset has been saved and it is ready for the training! \n")
-             print("")
+                 print("Training dataset: ", training_array.shape)
+                 print("Training emotion label: ", training_emotion_array.shape)
+                 print("Training noised label: ", training_noised_array.shape)
+                 print("Test dataset: ", test_array.shape)
+                 print("Test emotion label: ", test_emotion_array.shape)
+                 print("Test noised label: ", test_noised_array.shape)
 
-        except Exception as e:
-             print('Unable to save data to', pickle_file, ':', e)
-             raise
+                 print("Saving the file...")
+                 pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
+                 print("Closing the file...")
+                 f.close()
+
+                 print("")
+                 print("The dataset has been saved and it is ready for the training! \n")
+                 print("")
+
+            except Exception as e:
+                 print('Unable to save data to', pickle_file, ':', e)
+                 raise
 
 ##
 # Given a pickle file name and an element number it show the element
@@ -281,7 +277,7 @@ def main():
     # Specify an output folder and the image size (be careful to choose this size, it must be less
     # than the dimension of the original faces). You can choose if save the image in grayscale or colours.
 
-    create_csv(input_path="./", label_path="./output", output_path="./")
+    create_csv(input_path="../EmotionDataset/data/ck/CK+/Blocks/face/", label_path="../EmotionDataset/data/ck/CK+/Emotion/", output_path="../EmotionDataset/data/ck/CK+/Blocks/face/")
 
 
     #2- It creates 15 pickle files containing numpy arrays with images and labels.
