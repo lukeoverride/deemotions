@@ -96,6 +96,8 @@ def create_loo_pickle(csv_path, output_path):
     seq_n_vector = np.genfromtxt(csv_path, delimiter=',', skip_header=1, usecols=(2), dtype=np.float32)
     noised_vector = np.genfromtxt(csv_path, delimiter=',', skip_header=1, usecols=(3), dtype=np.float32)
     emotion_vector = np.genfromtxt(csv_path, delimiter=',', skip_header=1, usecols=(4), dtype=np.float32)
+    
+    person_id_unique_vector = np.unique(person_id_vector)
 
     #Printing shape
     print("Tot Images: " + str(len(image_list)))
@@ -104,7 +106,7 @@ def create_loo_pickle(csv_path, output_path):
     print("Emotion: " + str(emotion_vector.shape))
     
     #per ogni persona
-    for i in range(1,118):
+    for i in person_id_unique_vector:
         
             
             #local variable clered at ech cycle
@@ -131,7 +133,7 @@ def create_loo_pickle(csv_path, output_path):
      
                 #Separate test and training sets     
                 #FARE IN MODO CHE PRENDO SOLO LE IMMAGINI ORIGINALI E NON QUELLE RUMOROSE PER IL TEST SET     
-                if(int(person_id) == i and noised_vector[row_counter] == 0): #if it is not noised 
+                if(int(person_id) == int(i) and noised_vector[row_counter] == 0): #if it is not noised 
                      test_list.append(image)
                      test_emotion_list.append(emotion_vector[row_counter])
                 else:
