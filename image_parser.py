@@ -60,12 +60,13 @@ def create_csv(input_path, label_path, output_path):
             noised = 1;
         #RETRIEVE HERE THE EMOTION FILE ASSOCIATED
         emot = int(np.loadtxt(label_path+"S"+person_id+"/"+seq_n+"/"+image_no_extension+"_emotion.txt", unpack=True))
-        emoCode = list("0000000")
-        emoCode[emot-1]='1'
-        emotion = ''.join(emoCode)
+        emoCode = np.zeros((7,), dtype=np.int)
+        #emoCode = list("0000000")
+        emoCode[emot-1]=1
+        #emotion = ''.join(emoCode)
         #Write the CSV file
         fd = open(input_path + '/prima_label.csv','a')
-        fd.write(image_path + "," + str(int(person_id)) + "," + str(int(seq_n)) + "," + str(int(noised)) + "," + str(emotion) + "\n")
+        fd.write(image_path + "," + str(int(person_id)) + "," + str(int(seq_n)) + "," + str(int(noised)) + "," + str(emoCode) + "\n")
         fd.close()
         counter += 1
 
@@ -95,7 +96,7 @@ def create_loo_pickle(csv_path, output_path):
     person_id_vector = np.genfromtxt(csv_path, delimiter=',', skip_header=1, usecols=(1), dtype=np.float32) #prende la seconda colonna (indice 1) come vettore
     seq_n_vector = np.genfromtxt(csv_path, delimiter=',', skip_header=1, usecols=(2), dtype=np.float32)
     noised_vector = np.genfromtxt(csv_path, delimiter=',', skip_header=1, usecols=(3), dtype=np.float32)
-    emotion_vector = np.genfromtxt(csv_path, delimiter=',', skip_header=1, usecols=(4), dtype=np.float32)
+    emotion_vector = np.genfromtxt(csv_path, delimiter=',', skip_header=1, usecols=(4),dtype=np.ndarray)
     
     person_id_unique_vector = np.unique(person_id_vector)
 
@@ -218,7 +219,7 @@ def create_loo_pickle(csv_path, output_path):
 # @param element an integer that specifies which element to return
 # @param element_type the dataset to acces (training or test)
 # @param img_size the size of the image (default 64x64 pixels)
-def show_pickle_element(pickle_file, element, element_type="training", img_size=64):
+def show_pickle_element(pickle_file, element, element_type="training", img_size=32):
 
     #Check if the file exists
     if os.path.isfile(pickle_file) == False:
@@ -236,8 +237,7 @@ def show_pickle_element(pickle_file, element, element_type="training", img_size=
             print("emotion: " + str(training_emotion_label[element]))
             print("")
             img = training_dataset[element]
-            img_h, img_w, img_d = img.shape
-            img = np.reshape(img, (img_size,img_size,img_w))
+            img = np.reshape(img, (72,52,3))
             cv2.imwrite( "./image.jpg", img );
             #cv2.imshow('image',img)
             #cv2.waitKey(0)
@@ -252,8 +252,7 @@ def show_pickle_element(pickle_file, element, element_type="training", img_size=
             print("emotion: " + str(test_emotion_label[element]))
             print("")
             img = test_dataset[element]
-            img_h, img_w, img_d = image.shape
-            img = np.reshape(img, (img_size,img_size,img_w))
+            img = np.reshape(img, (72,52,3))
             cv2.imwrite( "./image.jpg", img );
             #cv2.imshow('image',img)
             #cv2.waitKey(0)
@@ -268,8 +267,7 @@ def show_pickle_element(pickle_file, element, element_type="training", img_size=
             print("emotion: " + str(valid_emotion_label[element]))
             print("")
             img = valid_dataset[element]
-            img_h, img_w, img_d = image.shape
-            img = np.reshape(img, (img_size,img_size,img_w))
+            img = np.reshape(img, (72,52,3))
             cv2.imwrite( "./image.jpg", img );
             #cv2.imshow('image',img)
             #cv2.waitKey(0)
@@ -290,21 +288,21 @@ def main():
     # Specify an output folder and the image size (be careful to choose this size, it must be less
     # than the dimension of the original faces). You can choose if save the image in grayscale or colours.
 
-    create_csv(input_path="../EmotionDataset/data/ck/CK+/Blocks/face/", label_path="../EmotionDataset/data/ck/CK+/Emotion/", output_path="../EmotionDataset/data/ck/CK+/Blocks/face/")
+    #create_csv(input_path="../EmotionDataset/data/ck/CK+/Blocks/face/", label_path="../EmotionDataset/data/ck/CK+/Emotion/", output_path="../EmotionDataset/data/ck/CK+/Blocks/face/")
 
 
     #2- It creates 118 pickle files containing numpy arrays with images and labels.
     # You have to specify the CSV file path created in step 1.
 
-    create_loo_pickle(csv_path="../EmotionDataset/data/ck/CK+/Blocks/face/prima_label.csv", output_path="./output")
+    #create_loo_pickle(csv_path="../EmotionDataset/data/ck/CK+/Blocks/face/prima_label.csv", output_path="./output")
 
 
     #3- You can check that everything is fine using this function.
     # In this example it takes a random element and save it in the current folder.
-    # It prints the noised and emotion labels of the element.
+    # It prints the emotion labels of the element.
     #element = np.random.randint(2600)
 
-    #show_pickle_element(pickle_file="./output/prima_p1_out.pickle", element=element, element_type="training", img_size=64)
+    show_pickle_element(pickle_file="./output/prima_p14.0_out.pickle", element=100, element_type="training", img_size=32)
 
 
 if __name__ == "__main__":
