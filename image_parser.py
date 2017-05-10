@@ -126,8 +126,9 @@ def create_loo_pickle(csv_path, output_path):
             for person_id in person_id_vector:
                 #Check if the image exists
                 if os.path.isfile(image_list[row_counter]):
-                    image = cv2.imread(str(image_list[row_counter])) #colour
-                    img_h, img_w, img_d = image.shape
+                    image = cv2.imread(str(image_list[row_counter]),0) #grayscale
+                    img_h, img_w = image.shape
+                    img_d = 1
                 else:
                     print("The image do not exist: " + image_list[row_counter])
                     raise ValueError('Error: the image file do not exist.')
@@ -288,13 +289,13 @@ def main():
     # Specify an output folder and the image size (be careful to choose this size, it must be less
     # than the dimension of the original faces). You can choose if save the image in grayscale or colours.
 
-    #create_csv(input_path="../EmotionDataset/data/ck/CK+/Blocks/face/", label_path="../EmotionDataset/data/ck/CK+/Emotion/", output_path="../EmotionDataset/data/ck/CK+/Blocks/face/")
+    create_csv(input_path="../EmotionDataset/data/ck/CK+/Blocks/mouth/", label_path="../EmotionDataset/data/ck/CK+/Emotion/", output_path="../EmotionDataset/data/ck/CK+/Blocks/mouth/")
 
 
     #2- It creates 118 pickle files containing numpy arrays with images and labels.
     # You have to specify the CSV file path created in step 1.
 
-    #create_loo_pickle(csv_path="../EmotionDataset/data/ck/CK+/Blocks/face/prima_label.csv", output_path="./output")
+    create_loo_pickle(csv_path="../EmotionDataset/data/ck/CK+/Blocks/mouth/prima_label.csv", output_path="./output/mouth")
 
 
     #3- You can check that everything is fine using this function.
@@ -302,7 +303,7 @@ def main():
     # It prints the emotion labels of the element.
     #element = np.random.randint(2600)
 
-    show_pickle_element(pickle_file="./output/prima_p14.0_out.pickle", element=100, element_type="training", img_size=32)
+    #show_pickle_element(pickle_file="./output/prima_p14.0_out.pickle", element=100, element_type="training", img_size=32)
 
 
 if __name__ == "__main__":
