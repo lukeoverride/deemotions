@@ -186,11 +186,6 @@ def main(block_name):
         valid_labels_new = extractArraysRemoveBrackets(valid_labels)
         test_labels_new = extractArraysRemoveBrackets(test_labels)
 
-        #Un altro metodo e' normalizzare tra 0 e 1 e shiftare tra -0.5 e 0.5
-        #train_dataset -= 127
-        #valid_dataset -= 127
-        #test_dataset -= 127
-
         #Printing the new shape of the datasets
         print('Training set', train_dataset.shape, train_labels.shape)
         print('Validation set', valid_dataset.shape, valid_labels_new.shape)
@@ -243,16 +238,21 @@ def main(block_name):
                 @param _dropout it is the dropout probability, leave to 1.0 if not used
                 @return the output of the network
                 '''
+                data = data/255
                 X = tf.reshape(data, shape=[-1, image_size_w, image_size_h, num_channels])
                 print("SHAPE X: " + str(X.get_shape()))  # Convolution Layer 1
-                conv1 = tf.sigmoid(tf.nn.bias_add(tf.nn.conv2d(X, conv1_weights, strides=[1, 1, 1, 1], padding='VALID'), conv1_biases))
+                #tensor1 = tf.nn.conv2d(X, conv1_weights, strides=[1, 1, 1, 1], padding='VALID')
+                #tensor2 = tf.nn.bias_add(tensor1, conv1_biases)
+                #tensor3 = tf.nn.relu(tensor2)
+                conv1 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(X, conv1_weights, strides=[1, 1, 1, 1], padding='VALID'), conv1_biases))
+
                 print("SHAPE conv1: " + str(conv1.get_shape()))
                 # Max Pooling (down-sampling)
                 pool1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
                 print("SHAPE pool1: " + str(pool1.get_shape()))
 
                 # Convolution Layer 2
-                conv2 = tf.sigmoid(tf.nn.bias_add(tf.nn.conv2d(pool1, conv2_weights, strides=[1, 1, 1, 1], padding='VALID'), conv2_biases))
+                conv2 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(pool1, conv2_weights, strides=[1, 1, 1, 1], padding='VALID'), conv2_biases))
                 print("SHAPE conv2: " + str(conv2.get_shape())) 
                 # Max Pooling (down-sampling)
                 pool2 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
@@ -260,7 +260,7 @@ def main(block_name):
 
                 # Output layer
                 out = tf.reshape(pool2, [-1, layer_out_weights.get_shape().as_list()[0]])
-                out = tf.sigmoid(tf.matmul(out, layer_out_weights) + layer_out_biases)
+                out = tf.matmul(out, layer_out_weights) + layer_out_biases
                 print("SHAPE out: " + str(out.get_shape()))
 
                 return out
@@ -348,8 +348,11 @@ def main(block_name):
                         #print("Validation size: " + str(valid_labels_new.shape))
                         #print("Validation RMSE: %.2f%%" % accuracy(valid_prediction.eval(), valid_labels_new, True))
                         print("")
-                feed_dict_test = {tf_test_dataset: test_dataset}
-                output_predictions = session.run([model_output], feed_dict=feed_dict_test)
+                #feed_dict_test = {tf_test_dataset: test_dataset}
+                #output_predictions = session.run([test_prediction], feed_dict=feed_dict_test)
+                #print output_predictions
+                print test_prediction.eval()
+                print test_labels_new
                 #print output_predictions
                 #TODO accuracy tra predictions e test_labels_new
                 #At the end of the simulation I save the network.
