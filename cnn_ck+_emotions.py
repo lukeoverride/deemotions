@@ -34,16 +34,14 @@ def accuracy(predictions, labels, verbose=False):
     '''
     #takes the highest value in the predictions and makes the one_hot vector
     predictions_normalized = np.zeros(predictions.shape)
-    for i in range(0,predictions.shape[0]):
-        predictions_normalized[i] = tf.one_hot(np.argmax(predictions[i]),7).eval()
-    correct = 0.0
-    for i in range(0,labels.shape[0]):
-        if ((predictions_normalized[i] == labels[i]).all()):
-            correct += 1.0
-    if (verbose == True):
-        print "accuracy = "+ str(correct/predictions.shape[0])
+    row = np.arange(predictions.shape[0])
+    col = np.argmax(predictions, axis=1)
+    predictions_normalized[row,col] = 1
+    #print predictions_normalized
+    difference = np.absolute(predictions_normalized - labels)
+    result = np.sum(difference,axis=1)
+    correct = np.sum(result==0).astype(np.float32)
     return correct/predictions.shape[0]
-
 
 def create_batch(train_dataset, train_labels):
     '''
@@ -221,7 +219,7 @@ def main(block_name):
             layer_out_weights = tf.Variable(tf.truncated_normal([conv2_size_w * conv2_size_h * 12, num_labels], stddev=0.1), name="outy_w")
             layer_out_biases = tf.Variable(tf.zeros([num_labels], name="outy_b"))
 
-            # dropout (keep probability)
+            # dropout (keep probability) - not used really up to now
             keep_prob = tf.placeholder(tf.float32) 													
 
             model_output = model(tf_train_dataset, image_size_w, image_size_h, num_channels, conv1_weights, conv1_biases, conv2_weights, conv2_biases,
@@ -258,6 +256,11 @@ def main(block_name):
                 writer_summaries = tf.summary.FileWriter(log_path, session.graph)
                 tf.global_variables_initializer().run()
 
+                epochs = np.ndarray(0,int)
+                losses = np.ndarray(0,np.float32)
+                accuracy_batch = np.ndarray(0,np.float32)
+                accuracy_valid = np.ndarray(0,np.float32)
+
                 for epoch in range(total_epochs):
                     batch = create_batch(train_dataset, train_labels_new)
                     batch_data = batch[0]
@@ -267,22 +270,27 @@ def main(block_name):
                                                     feed_dict=feed_dict)
                     writer_summaries.add_summary(my_summary, epoch)
 
-                    if (epoch % 10 == 0):
+                    epochs = np.append(epochs, epoch)
+                    losses = np.append(losses, l)
+                    accuracy_batch = np.append(accuracy_batch, accuracy(predictions, batch_labels, False))
+                    accuracy_valid = np.append(accuracy_valid, accuracy(valid_prediction.eval(), valid_labels_new, False))
+
+                    if (epoch % 50 == 0):
                         print("")
                         print("Loss at epoch: ", epoch, " is " , l)
                         print("Global Step: " + str(global_step.eval()) + " of " + str(total_epochs))
                         print("Learning Rate: " + str(learning_rate.eval()))
                         print("Minibatch size: " + str(batch_labels.shape))
+                        print("Validation size: " + str(valid_labels_new.shape))
                         accuracy(predictions, batch_labels, True)
-                        #print("Validation size: " + str(valid_labels_new.shape))
-                        #print("Validation RMSE: %.2f%%" % accuracy(valid_prediction.eval(), valid_labels_new, True))
                         print("")
+
                 saver.save(session, "./sessions/tensorflow/cnn_arch1_pitch_p1" , global_step=epoch)  # save the session
-                accuracy(test_prediction.eval(),test_labels_new, True)
+                accuracy_test = accuracy(test_prediction.eval(),test_labels_new, True)
+                output = np.column_stack((epochs.flatten(), losses.flatten(), accuracy_batch.flatten(), accuracy_valid.flatten()))
+                np.savetxt("./sessions/epochs_log/personumber2.txt", output, header="epoch    loss    accuracy_batch    accuracy_valid", footer="accuracy_test:\n"+str(accuracy_test), delimiter='   ')
                 print("# Test size: " + str(test_labels_new.shape))
 
-                #TODO vedere quando e come lanciare accuracy su validation set
-                #TODO commentare le funzioni
 
 
 if __name__ == "__main__":
