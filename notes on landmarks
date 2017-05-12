@@ -1,3 +1,6 @@
+Description of the landmark points given with the CK+ databases. I captured these informations by projecting the points
+onto the faces with through drawLandmarks.py file.
+
 0-16 face edge
 17-21 left eyebrow
 22-26 right eyebrow

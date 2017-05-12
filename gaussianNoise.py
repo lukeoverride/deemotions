@@ -1,3 +1,10 @@
+'''
+    Luca Surace, University of Calabria - Plymouth University
+    
+    This code creates for each image in the path (first argument), two gaussian noised images:
+    the first one with 7-value, the second one with a value of 14.
+'''
+
 import numpy as np
 import glob,os
 import cv2

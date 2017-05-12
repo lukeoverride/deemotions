@@ -1,28 +1,34 @@
+'''
+Luca Surace, University of Calabria - Plymouth University
 
-# Luca Surace, Plymouth University 2017
-#
-#In this example I load a pickle file containing emotional images.
-#The model take as input an image (or a batch) and return a vector
-#representing the emotion target value of the face given as input.
-#
-#DATASET: It requires a pickle file which must be in the same folder of this script.
-#This file is based on the "CK+ dataset" which is available for free.
-#
-#TENSORBOARD: this code works on my system and it shows correctly the value of the learning rate
-#and the loss at each epoch. It saves a log file in the foder '/tmp/log/pitch_logs_p1_161944'
-#You should notice that the name of the file is based on the current time. You should check this
-#name in the folder and use it in Tensorboard.
-#You can run tensorboard with this command: tensorboard --logdir="file:///tmp/log/pitch_logs_p1_161944"
-#(where the name of the file can change based on the current time). In the code below I used 
-#the tag 'Tensorboard' in the comments, every time I declared a Tensorboard-related variable.
-#Important: to visualise the variable you have to wait a couple of minutes after the simulation started.
-#Tensorboard is slow and it can take a while in order to load the first results.
+This file contains the CNN structure to classify emotional pictures. It is training on the "CK+ dataset" and also computes
+loss and accuracy, which are written in a .txt file.
+
+The emotional images are loaded from a pickle file.
+The model take as input an image (or a batch) and return a vector
+representing the emotion target value of the face given as input.
+
+DATASET: It requires a pickle file which must be in the same folder of this script.
+This file is based on the "CK+ dataset" which is available for free.
+
+TENSORBOARD: this code works on my system and it shows correctly the value of the learning rate
+and the loss at each epoch. It saves a log file in the foder '/tmp/log/pitch_logs_p1_161944'
+You should notice that the name of the file is based on the current time. You should check this
+name in the folder and use it in Tensorboard.
+You can run tensorboard with this command: tensorboard --logdir="file:///tmp/log/pitch_logs_p1_161944"
+(where the name of the file can change based on the current time). In the code below I used 
+the tag 'Tensorboard' in the comments, every time I declared a Tensorboard-related variable.
+Important: to visualise the variable you have to wait a couple of minutes after the simulation started.
+Tensorboard is slow and it can take a while in order to load the first results.
+
+'''
+
 
 import numpy as np
 import tensorflow as tf
 from six.moves import cPickle as pickle
 import datetime
-
+import os,sys,glob
 
 def accuracy(predictions, labels, verbose=False):
     '''This function return the accuracy
@@ -131,8 +137,11 @@ def model(data, image_size_w, image_size_h, num_channels, conv1_weights, conv1_b
 
 
 def main(block_name):
-              
-        pickle_file = "./output/"+block_name+"/prima_p10.0_out.pickle"
+
+    for pickle_file in glob.glob(sys.argv[1]+block_name+"/*.pickle"):
+        subject = pickle_file[len(pickle_file) - 12:len(pickle_file) - 7];
+        print subject
+        #pickle_file = "./output/"+block_name+"/prima_p10.0_out.pickle"
         batch_size = 25
         patch_size = 5 # filter size
         myInitializer = None
@@ -252,7 +261,7 @@ def main(block_name):
             with tf.Session(graph=graph) as session:
                 merged_summaries = tf.summary.merge_all()
                 now = datetime.datetime.now()
-                log_path = "/tmp/log/pitch_logs_p1_" + str(now.hour) + str(now.minute) + str(now.second)
+                log_path = "./sessions/summary_log/summaries_logs_p"+subject+ str(now.hour) + str(now.minute) + str(now.second)
                 writer_summaries = tf.summary.FileWriter(log_path, session.graph)
                 tf.global_variables_initializer().run()
 
@@ -270,7 +279,7 @@ def main(block_name):
                                                     feed_dict=feed_dict)
                     writer_summaries.add_summary(my_summary, epoch)
 
-                    epochs = np.append(epochs, epoch)
+                    epochs = np.append(epochs, int(epoch+1))
                     losses = np.append(losses, l)
                     accuracy_batch = np.append(accuracy_batch, accuracy(predictions, batch_labels, False))
                     accuracy_valid = np.append(accuracy_valid, accuracy(valid_prediction.eval(), valid_labels_new, False))
@@ -285,10 +294,11 @@ def main(block_name):
                         accuracy(predictions, batch_labels, True)
                         print("")
 
-                saver.save(session, "./sessions/tensorflow/cnn_arch1_pitch_p1" , global_step=epoch)  # save the session
+
+                saver.save(session, "./sessions/tensorflow/cnn_arch1_pitch_p"+subject , global_step=epoch)  # save the session
                 accuracy_test = accuracy(test_prediction.eval(),test_labels_new, True)
                 output = np.column_stack((epochs.flatten(), losses.flatten(), accuracy_batch.flatten(), accuracy_valid.flatten()))
-                np.savetxt("./sessions/epochs_log/personumber2.txt", output, header="epoch    loss    accuracy_batch    accuracy_valid", footer="accuracy_test:\n"+str(accuracy_test), delimiter='   ')
+                np.savetxt("./sessions/epochs_log/subject_"+subject+".txt", output, header="epoch    loss    accuracy_batch    accuracy_valid", footer="accuracy_test:\n"+str(accuracy_test), delimiter='   ')
                 print("# Test size: " + str(test_labels_new.shape))
 
 

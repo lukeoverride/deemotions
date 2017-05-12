@@ -178,7 +178,7 @@ def create_loo_pickle(csv_path, output_path):
             print("Test emotion label: ", test_emotion_array.shape)
 
             #saving the dataset in a pickle file
-            pickle_file = output_path + "/prima_p" + str(i) + "_out.pickle"
+            pickle_file = output_path + "/ck+_p" + str(i) + ".pickle"
             print("Saving the dataset in: " + pickle_file)
             print("... ")
             try:

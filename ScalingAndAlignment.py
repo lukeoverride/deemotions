@@ -1,6 +1,14 @@
-# 1) scales all faces by imposing a fix distance between pupils. This distance is the average of the pupils distances in the dataset; 2) makes eye alignment by face rotation, setting the angle of the line passing through the pupils to 0 degrees.
-# argument 1: path of the original images and landmarks (input)
-# argument 2: path of the folder to save transformed images and landmarks (output)
+'''
+    Luca Surace, University of Calabria - Plymouth University
+    
+    This code performs image preprocessing, in particular:
+    1) scales all faces by imposing a fix distance between pupils. This distance is the average of the pupils distances in the dataset;
+    2) makes eye alignment by face rotation, setting the angle of the line passing through the pupils to 0 degrees.
+    @argument 1: path of the original images and landmarks (input)
+    @argument 2: path of the folder to save transformed images and landmarks (output)
+'''
+
+
 
 import sys
 import numpy as np
