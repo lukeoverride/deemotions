@@ -1,8 +1,27 @@
 '''
-    Luca Surace, University of Calabria - Plymouth University
+    Copyright (C) 2017 Luca Surace - University of Calabria, Plymouth University
     
+    This file is part of Deemotions. Deemotions is an Emotion Recognition System
+    based on Deep Learning method.
+
+    Deemotions is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Deemotions is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Deemotions.  If not, see <http://www.gnu.org/licenses/>.
+    
+    -----------------------------------------------------------------------
+        
     This code creates for each image in the path (first argument), two gaussian noised images:
     the first one with 7-value, the second one with a value of 14.
+    
 '''
 
 import numpy as np

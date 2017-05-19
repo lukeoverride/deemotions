@@ -1,21 +1,39 @@
 #!/usr/bin/env python
 
-##
-# Massimiliano Patacchiola, Plymouth University 2016
-# massimiliano.patacchiola@plymouth.ac.uk
-#
-# Python example for the manipulation of the Prima Head Pose Image Database:
-# http://www-prima.inrialpes.fr/perso/Gourier/Faces/HPDatabase.html
-#
-# It contains three functions that allow creating a CSV file and to crop/resize
-# the faces. It can generate 15 pickle files for the leave-one-out (Jack Knife)
-# cross-validation test on unknown subjects. 
-# To use the file you have to insert the right paths in the main function.
-#
-# Requirements: 
-# OpenCV (sudo apt-get install libopencv-dev python-opencv) 
-# Numpy (sudo pip install numpy)
-# Six (sudo pip install six)
+'''
+    Copyright (C) 2017 Luca Surace - University of Calabria, Plymouth University
+                  2016 Massimiliano Patacchiola, Plymouth University
+    
+    This file is part of Deemotions. Deemotions is an Emotion Recognition System
+    based on Deep Learning method.
+
+    Deemotions is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Deemotions is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Deemotions.  If not, see <http://www.gnu.org/licenses/>.
+    
+    -----------------------------------------------------------------------
+    
+    It contains three functions that allow creating a CSV file .
+    It can generate 118 pickle files for the leave-one-out (Jack Knife)
+    cross-validation test on unknown subjects. 
+    To use the file you have to insert the right paths in the main function.
+
+    Requirements: 
+    OpenCV (sudo apt-get install libopencv-dev python-opencv) 
+    Numpy (sudo pip install numpy)
+    Six (sudo pip install six)
+
+'''
+
 
 import cv2
 import os.path
@@ -105,8 +123,8 @@ def create_loo_pickle(csv_path, output_path):
     print("Person ID: " + str(person_id_vector.shape))
     print("Sequence n: " + str(seq_n_vector.shape))
     print("Emotion: " + str(emotion_vector.shape))
-    
-    #per ogni persona
+
+    #for each subject
     for i in person_id_unique_vector:
         
             
@@ -134,8 +152,7 @@ def create_loo_pickle(csv_path, output_path):
                     raise ValueError('Error: the image file do not exist.')
      
                 #Separate test and training sets     
-                #FARE IN MODO CHE PRENDO SOLO LE IMMAGINI ORIGINALI E NON QUELLE RUMOROSE PER IL TEST SET     
-                if(int(person_id) == int(i) and noised_vector[row_counter] == 0): #if it is not noised 
+                if(int(person_id) == int(i) and noised_vector[row_counter] == 0): #if it is not noised
                      test_list.append(image)
                      test_emotion_list.append(emotion_vector[row_counter])
                 else:
@@ -227,55 +244,56 @@ def show_pickle_element(pickle_file, element, element_type="training", img_size=
         print("The pickle file do not exist: " + pickle_file)
         raise ValueError('Error: the pickle file do not exist.')
 
+    with open(pickle_file, 'rb') as f:
     #Open the specified dataset and return the element
-    if(element_type == "training"):
-        with open(pickle_file, 'rb') as f:
-            handle = pickle.load(f)
-            training_dataset = handle['training_dataset']
-            training_emotion_label = handle['training_emotion_label']
-            del handle  # hint to help gc free up memory
-            print("Selected element: " + str(element))
-            print("emotion: " + str(training_emotion_label[element]))
-            print("")
-            img = training_dataset[element]
-            img = np.reshape(img, (72,52,3))
-            cv2.imwrite( "./image.jpg", img );
-            #cv2.imshow('image',img)
-            #cv2.waitKey(0)
-            #cv2.destroyAllWindows()
+        if(element_type == "training"):
 
-    elif(element_type == "test"):
-            handle = pickle.load(f)
-            test_dataset = handle['test_dataset']
-            test_emotion_label = handle['test_emotion_label']
-            del handle  # hint to help gc free up memory
-            print("Selected element: " + str(element))
-            print("emotion: " + str(test_emotion_label[element]))
-            print("")
-            img = test_dataset[element]
-            img = np.reshape(img, (72,52,3))
-            cv2.imwrite( "./image.jpg", img );
-            #cv2.imshow('image',img)
-            #cv2.waitKey(0)
-            #cv2.destroyAllWindows()
-            
-    elif(element_type == "validation"):
-            handle = pickle.load(f)
-            valid_dataset = handle['validation_dataset']
-            valid_emotion_label = handle['validation_emotion_label']
-            del handle  # hint to help gc free up memory
-            print("Selected element: " + str(element))
-            print("emotion: " + str(valid_emotion_label[element]))
-            print("")
-            img = valid_dataset[element]
-            img = np.reshape(img, (72,52,3))
-            cv2.imwrite( "./image.jpg", img );
-            #cv2.imshow('image',img)
-            #cv2.waitKey(0)
-            #cv2.destroyAllWindows() 
+                handle = pickle.load(f)
+                training_dataset = handle['training_dataset']
+                training_emotion_label = handle['training_emotion_label']
+                del handle  # hint to help gc free up memory
+                print("Selected element: " + str(element))
+                print("emotion: " + str(training_emotion_label[element]))
+                print("")
+                img = training_dataset[element]
+                img = np.reshape(img, (72,52,3))
+                cv2.imwrite( "./image.jpg", img );
+                #cv2.imshow('image',img)
+                #cv2.waitKey(0)
+                #cv2.destroyAllWindows()
 
-    else:
-        raise ValueError('Error: element_type must be training or test.')
+        elif(element_type == "test"):
+                handle = pickle.load(f)
+                test_dataset = handle['test_dataset']
+                test_emotion_label = handle['test_emotion_label']
+                del handle  # hint to help gc free up memory
+                print("Selected element: " + str(element))
+                print("emotion: " + str(test_emotion_label[element]))
+                print("")
+                img = test_dataset[element]
+                img = np.reshape(img, (72,52,1))
+                cv2.imwrite( "./image.jpg", img );
+                #cv2.imshow('image',img)
+                #cv2.waitKey(0)
+                #cv2.destroyAllWindows()
+
+        elif(element_type == "validation"):
+                handle = pickle.load(f)
+                valid_dataset = handle['validation_dataset']
+                valid_emotion_label = handle['validation_emotion_label']
+                del handle  # hint to help gc free up memory
+                print("Selected element: " + str(element))
+                print("emotion: " + str(valid_emotion_label[element]))
+                print("")
+                img = valid_dataset[element]
+                img = np.reshape(img, (72,52,3))
+                cv2.imwrite( "./image.jpg", img );
+                #cv2.imshow('image',img)
+                #cv2.waitKey(0)
+                #cv2.destroyAllWindows()
+
+        else:
+            raise ValueError('Error: element_type must be training or test.')
 
 
 ##
@@ -289,13 +307,13 @@ def main():
     # Specify an output folder and the image size (be careful to choose this size, it must be less
     # than the dimension of the original faces). You can choose if save the image in grayscale or colours.
 
-    create_csv(input_path="../EmotionDataset/data/ck/CK+/Blocks/mouth/", label_path="../EmotionDataset/data/ck/CK+/Emotion/", output_path="../EmotionDataset/data/ck/CK+/Blocks/mouth/")
+    #create_csv(input_path="../EmotionDataset/data/ck/CK+/Blocks/eye/", label_path="../EmotionDataset/data/ck/CK+/Emotion/", output_path="../EmotionDataset/data/ck/CK+/Blocks/eye/")
 
 
     #2- It creates 118 pickle files containing numpy arrays with images and labels.
     # You have to specify the CSV file path created in step 1.
 
-    create_loo_pickle(csv_path="../EmotionDataset/data/ck/CK+/Blocks/mouth/prima_label.csv", output_path="./output/mouth")
+    #create_loo_pickle(csv_path="../EmotionDataset/data/ck/CK+/Blocks/face/prima_label.csv", output_path="./output/face")
 
 
     #3- You can check that everything is fine using this function.
@@ -303,7 +321,7 @@ def main():
     # It prints the emotion labels of the element.
     #element = np.random.randint(2600)
 
-    #show_pickle_element(pickle_file="./output/prima_p14.0_out.pickle", element=100, element_type="training", img_size=32)
+    show_pickle_element(pickle_file="./output/face/ck+_p46.0.pickle", element=2, element_type="test", img_size=32)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,23 @@
 '''
-    Luca Surace, University of Calabria - Plymouth University
+    Copyright (C) 2017 Luca Surace - University of Calabria, Plymouth University
+    
+    This file is part of Deemotions. Deemotions is an Emotion Recognition System
+    based on Deep Learning method.
+
+    Deemotions is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Deemotions is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Deemotions.  If not, see <http://www.gnu.org/licenses/>.
+    
+    -----------------------------------------------------------------------
     
     This code performs image preprocessing, in particular:
     1) scales all faces by imposing a fix distance between pupils. This distance is the average of the pupils distances in the dataset;

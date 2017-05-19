@@ -1,25 +1,45 @@
 '''
-Luca Surace, University of Calabria - Plymouth University
+    Copyright (C) 2017 Luca Surace - University of Calabria, Plymouth University
+                  2016 Massimiliano Patacchiola, Plymouth University
+    
+    This file is part of Deemotions. Deemotions is an Emotion Recognition System
+    based on Deep Learning method.
 
-This file contains the CNN structure to classify emotional pictures. It is training on the "CK+ dataset" and also computes
-loss and accuracy, which are written in a .txt file.
+    Deemotions is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-The emotional images are loaded from a pickle file.
-The model take as input an image (or a batch) and return a vector
-representing the emotion target value of the face given as input.
+    Deemotions is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-DATASET: It requires a pickle file which must be in the same folder of this script.
-This file is based on the "CK+ dataset" which is available for free.
+    You should have received a copy of the GNU General Public License
+    along with Deemotions.  If not, see <http://www.gnu.org/licenses/>.
+    
+    -----------------------------------------------------------------------
 
-TENSORBOARD: this code works on my system and it shows correctly the value of the learning rate
-and the loss at each epoch. It saves a log file in the foder '/tmp/log/pitch_logs_p1_161944'
-You should notice that the name of the file is based on the current time. You should check this
-name in the folder and use it in Tensorboard.
-You can run tensorboard with this command: tensorboard --logdir="file:///tmp/log/pitch_logs_p1_161944"
-(where the name of the file can change based on the current time). In the code below I used 
-the tag 'Tensorboard' in the comments, every time I declared a Tensorboard-related variable.
-Important: to visualise the variable you have to wait a couple of minutes after the simulation started.
-Tensorboard is slow and it can take a while in order to load the first results.
+    This file contains the CNN structure to classify emotional pictures.
+    It is training on the "CK+ dataset" and also computes
+    loss and accuracy, which are written in a .txt file.
+    
+    The emotional images are loaded from a pickle file.
+    The model take as input an image (or a batch) and return a vector
+    representing the emotion target value of the face given as input.
+    
+    DATASET: It requires a pickle file which must be in the same folder of this script.
+    This file is based on the "CK+ dataset" which is available for free.
+    
+    TENSORBOARD: this code works on my system and it shows correctly the value of the learning rate
+    and the loss at each epoch. It saves a log file in the foder '/tmp/log/pitch_logs_p1_161944'
+    You should notice that the name of the file is based on the current time. You should check this
+    name in the folder and use it in Tensorboard.
+    You can run tensorboard with this command: tensorboard --logdir="file:///tmp/log/pitch_logs_p1_161944"
+    (where the name of the file can change based on the current time). In the code below I used 
+    the tag 'Tensorboard' in the comments, every time I declared a Tensorboard-related variable.
+    Important: to visualise the variable you have to wait a couple of minutes after the simulation started.
+    Tensorboard is slow and it can take a while in order to load the first results.
 
 '''
 
@@ -43,10 +63,11 @@ def accuracy(predictions, labels, verbose=False):
     row = np.arange(predictions.shape[0])
     col = np.argmax(predictions, axis=1)
     predictions_normalized[row,col] = 1
-    #print predictions_normalized
     difference = np.absolute(predictions_normalized - labels)
     result = np.sum(difference,axis=1)
     correct = np.sum(result==0).astype(np.float32)
+    if (verbose == True):
+        print correct/predictions.shape[0]
     return correct/predictions.shape[0]
 
 def create_batch(train_dataset, train_labels):
@@ -98,8 +119,8 @@ def extractArraysRemoveBrackets(labels):
     return labels_new
 
 
-def model(data, image_size_w, image_size_h, num_channels, conv1_weights, conv1_biases, conv2_weights, conv2_biases, layer_out_weights,
-          layer_out_biases, _dropout=1.0):
+def model(data, image_size_w, image_size_h, num_channels, conv1_weights, conv1_biases, conv2_weights, conv2_biases,
+          dense1_weights, dense1_biases, layer_out_weights, layer_out_biases, _dropout=1.0):
     '''The model of the network.
 
     This function takes as input the batch, which is a matrix where each row is 
@@ -111,27 +132,29 @@ def model(data, image_size_w, image_size_h, num_channels, conv1_weights, conv1_b
     '''
     data = data / 255
     X = tf.reshape(data, shape=[-1, image_size_w, image_size_h, num_channels])
-    print("SHAPE X: " + str(X.get_shape()))  # Convolution Layer 1
     conv1 = tf.nn.relu(
         tf.nn.bias_add(tf.nn.conv2d(X, conv1_weights, strides=[1, 1, 1, 1], padding='VALID'), conv1_biases))
 
-    print("SHAPE conv1: " + str(conv1.get_shape()))
     # Max Pooling (down-sampling)
     pool1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    print("SHAPE pool1: " + str(pool1.get_shape()))
 
     # Convolution Layer 2
     conv2 = tf.nn.relu(
         tf.nn.bias_add(tf.nn.conv2d(pool1, conv2_weights, strides=[1, 1, 1, 1], padding='VALID'), conv2_biases))
-    print("SHAPE conv2: " + str(conv2.get_shape()))
     # Max Pooling (down-sampling)
     pool2 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    print("SHAPE pool2: " + str(pool2.get_shape()))
+
+    # Fully connected layer 1
+    dense1 = tf.reshape(pool2, [-1, dense1_weights.get_shape().as_list()[0]])  # Reshape conv3
+    dense1 = tf.matmul(dense1, dense1_weights) + dense1_biases
 
     # Output layer
-    out = tf.reshape(pool2, [-1, layer_out_weights.get_shape().as_list()[0]])
-    out = tf.matmul(out, layer_out_weights) + layer_out_biases
-    print("SHAPE out: " + str(out.get_shape()))
+    out = tf.matmul(dense1, layer_out_weights) + layer_out_biases
+
+    # Output layer
+    #out = tf.reshape(pool2, [-1, layer_out_weights.get_shape().as_list()[0]])
+    #out = tf.matmul(out, layer_out_weights) + layer_out_biases
+    #print("SHAPE out: " + str(out.get_shape()))
 
     return out
 
@@ -140,7 +163,6 @@ def main(block_name):
 
     for pickle_file in glob.glob(sys.argv[1]+block_name+"/*.pickle"):
         subject = pickle_file[len(pickle_file) - 12:len(pickle_file) - 7];
-        print subject
         #pickle_file = "./output/"+block_name+"/prima_p10.0_out.pickle"
         batch_size = 25
         patch_size = 5 # filter size
@@ -153,7 +175,7 @@ def main(block_name):
         elif (block_name == "mouth"):
             image_size_h = 24
             image_size_w = 40
-        elif (block_name == "left_eye"):
+        elif (block_name == "eye"):
             image_size_h = 24
             image_size_w = 32
         elif (block_name == "top_nose"):
@@ -216,7 +238,7 @@ def main(block_name):
             conv1_biases = tf.Variable(tf.zeros([6]), name="conv1y_b")
             # Conv layer
             # [patch_size, patch_size, depth, depth]
-            conv2_weights = tf.Variable(tf.truncated_normal([patch_size, patch_size, 6, 12], stddev=0.1), name="conv2y_w")
+            conv2_weights = tf.get_variable(name="conv2y_w",shape=[patch_size, patch_size, 6, 12], initializer=myInitializer)
             conv2_biases = tf.Variable(tf.zeros([12]), name="conv2y_b")
 
 
@@ -225,38 +247,46 @@ def main(block_name):
             conv2_size_w = (conv1_size_w - patch_size + 1)/2
             conv1_size_h = (image_size_h - patch_size + 1)/2
             conv2_size_h = (conv1_size_h - patch_size + 1)/2
-            layer_out_weights = tf.Variable(tf.truncated_normal([conv2_size_w * conv2_size_h * 12, num_labels], stddev=0.1), name="outy_w")
-            layer_out_biases = tf.Variable(tf.zeros([num_labels], name="outy_b"))
+            #layer_out_weights = tf.Variable(tf.truncated_normal([conv2_size_w * conv2_size_h * 12, num_labels], stddev=0.1), name="outy_w")
+            #layer_out_biases = tf.Variable(tf.zeros([num_labels], name="outy_b"))
+
+            dense1_weights = tf.get_variable(name="dense1y_w",shape=[conv2_size_w * conv2_size_h * 12, 256], initializer=myInitializer)
+            dense1_biases = tf.Variable(tf.zeros([256], name="dense1y_b"))
+
+            # Output layer
+            layer_out_weights = tf.get_variable(name="outy_w",shape=[256, num_labels], initializer=myInitializer)
+            layer_out_biases = tf.Variable(tf.zeros(shape=[num_labels]), name="outy_b")
 
             # dropout (keep probability) - not used really up to now
             keep_prob = tf.placeholder(tf.float32) 													
 
             model_output = model(tf_train_dataset, image_size_w, image_size_h, num_channels, conv1_weights, conv1_biases, conv2_weights, conv2_biases,
-                                 layer_out_weights, layer_out_biases, keep_prob)
+                                 dense1_weights, dense1_biases, layer_out_weights, layer_out_biases, keep_prob)
             loss = tf.nn.l2_loss(model_output - tf_train_labels)
 
             #La regolarizzazione aggiunge informazioni per prevenire overfitting (Wikipedia)
             beta = 5e-4
             loss += (beta * tf.nn.l2_loss(conv1_weights)) 
-            loss += (beta * tf.nn.l2_loss(conv2_weights)) 
+            loss += (beta * tf.nn.l2_loss(conv2_weights))
+            loss += (beta * tf.nn.l2_loss(dense1_weights))
             loss += (beta * tf.nn.l2_loss(layer_out_weights))
 
             loss_summ = tf.summary.scalar("loss", loss)
 
             global_step = tf.Variable(0, trainable=False)  # count the number of steps taken.
-            learning_rate = tf.train.exponential_decay(0.00125, global_step, 70, 0.1, staircase=True)
+            learning_rate = tf.train.exponential_decay(0.00125, global_step, 300, 0.8, staircase=True)
             lrate_summ = tf.summary.scalar("learning rate", learning_rate) #save in a summary for Tensorboard
             optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
 
             train_prediction = model_output
             valid_prediction = model(tf_valid_dataset, image_size_w, image_size_h, num_channels, conv1_weights, conv1_biases, conv2_weights, conv2_biases,
-                                 layer_out_weights, layer_out_biases)
+                                     dense1_weights, dense1_biases, layer_out_weights, layer_out_biases)
             test_prediction = model(tf_test_dataset, image_size_w, image_size_h, num_channels, conv1_weights, conv1_biases, conv2_weights, conv2_biases,
-                                 layer_out_weights, layer_out_biases)
+                                    dense1_weights, dense1_biases, layer_out_weights, layer_out_biases)
 
             saver = tf.train.Saver()
 
-            total_epochs = 100
+            total_epochs = 500
 
             with tf.Session(graph=graph) as session:
                 merged_summaries = tf.summary.merge_all()

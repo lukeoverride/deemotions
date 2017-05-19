@@ -1,3 +1,29 @@
+'''
+    Copyright (C) 2017 Luca Surace - University of Calabria, Plymouth University
+    
+    This file is part of Deemotions. Deemotions is an Emotion Recognition System
+    based on Deep Learning method.
+
+    Deemotions is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Deemotions is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Deemotions.  If not, see <http://www.gnu.org/licenses/>.
+    
+    -----------------------------------------------------------------------
+    
+    This file crops CK+ images in five blocks (tight face, mouth, left eye, top nose, nose tip)
+    using landmarks files given with the CK+ dataset.
+    
+'''
+
 import cv2
 import numpy as np
 import sys
