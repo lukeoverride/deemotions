@@ -118,6 +118,20 @@ def extractArraysRemoveBrackets(labels):
             labels_new[i][t / 2] = labels[i][t]
     return labels_new
 
+def minmax_normalization(data):
+    return ((data - np.min(data))/np.max(data))
+
+def image_histogram_equalization(image, number_bins=256):
+    # from http://www.janeriksolem.net/2009/06/histogram-equalization-with-python-and.html
+    # get image histogram
+    image_histogram, bins = np.histogram(image.flatten(), number_bins, normed=True)
+    cdf = image_histogram.cumsum() # cumulative distribution function
+    cdf = 255 * cdf / cdf[-1] # normalize
+
+    # use linear interpolation of cdf to find new pixel values
+    image_equalized = np.float32(np.interp(image.flatten(), bins[:-1], cdf))
+    return image_equalized.reshape(image.shape)
+
 
 def model(data, image_size_w, image_size_h, num_channels, conv1_weights, conv1_biases, conv2_weights, conv2_biases,
           dense1_weights, dense1_biases, layer_out_weights, layer_out_biases, _dropout=1.0):
@@ -130,17 +144,14 @@ def model(data, image_size_w, image_size_h, num_channels, conv1_weights, conv1_b
     @param _dropout it is the dropout probability, leave to 1.0 if not used
     @return the output of the network
     '''
-    data = data / 255
     X = tf.reshape(data, shape=[-1, image_size_w, image_size_h, num_channels])
-    conv1 = tf.nn.relu(
-        tf.nn.bias_add(tf.nn.conv2d(X, conv1_weights, strides=[1, 1, 1, 1], padding='VALID'), conv1_biases))
+    conv1 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(X, conv1_weights, strides=[1, 1, 1, 1], padding='VALID'), conv1_biases))
 
     # Max Pooling (down-sampling)
     pool1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
     # Convolution Layer 2
-    conv2 = tf.nn.relu(
-        tf.nn.bias_add(tf.nn.conv2d(pool1, conv2_weights, strides=[1, 1, 1, 1], padding='VALID'), conv2_biases))
+    conv2 = tf.nn.bias_add(tf.nn.conv2d(pool1, conv2_weights, strides=[1, 1, 1, 1], padding='VALID'), conv2_biases)
     # Max Pooling (down-sampling)
     pool2 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
@@ -216,6 +227,15 @@ def main(block_name):
         valid_labels_new = extractArraysRemoveBrackets(valid_labels)
         test_labels_new = extractArraysRemoveBrackets(test_labels)
 
+        train_dataset = image_histogram_equalization(train_dataset)
+        valid_dataset = image_histogram_equalization(valid_dataset)
+        test_dataset = image_histogram_equalization(test_dataset)
+
+        train_dataset = minmax_normalization(train_dataset)
+        valid_dataset = minmax_normalization(valid_dataset)
+        test_dataset = minmax_normalization(test_dataset)
+
+
         #Printing the new shape of the datasets
         print('Training set', train_dataset.shape, train_labels.shape)
         print('Validation set', valid_dataset.shape, valid_labels_new.shape)
@@ -274,7 +294,7 @@ def main(block_name):
             loss_summ = tf.summary.scalar("loss", loss)
 
             global_step = tf.Variable(0, trainable=False)  # count the number of steps taken.
-            learning_rate = tf.train.exponential_decay(0.00125, global_step, 300, 0.8, staircase=True)
+            learning_rate = tf.train.exponential_decay(0.00125, global_step, 300, 0.5, staircase=True)
             lrate_summ = tf.summary.scalar("learning rate", learning_rate) #save in a summary for Tensorboard
             optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
 
