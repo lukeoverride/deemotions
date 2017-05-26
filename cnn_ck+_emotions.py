@@ -151,7 +151,7 @@ def model(data, image_size_w, image_size_h, num_channels, conv1_weights, conv1_b
     pool1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
     # Convolution Layer 2
-    conv2 = tf.nn.bias_add(tf.nn.conv2d(pool1, conv2_weights, strides=[1, 1, 1, 1], padding='VALID'), conv2_biases)
+    conv2 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(pool1, conv2_weights, strides=[1, 1, 1, 1], padding='VALID'), conv2_biases))
     # Max Pooling (down-sampling)
     pool2 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
@@ -189,10 +189,10 @@ def main(block_name):
         elif (block_name == "eye"):
             image_size_h = 24
             image_size_w = 32
-        elif (block_name == "top_nose"):
+        elif (block_name == "topnose"):
             image_size_h = 36
             image_size_w = 40
-        elif (block_name == "nose_tip"):
+        elif (block_name == "nosetip"):
             image_size_h = 32
             image_size_w = 40
 
@@ -354,4 +354,4 @@ def main(block_name):
 
 
 if __name__ == "__main__":
-    main("mouth")
+    main("topnose")

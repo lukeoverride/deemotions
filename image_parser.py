@@ -307,13 +307,13 @@ def main():
     # Specify an output folder and the image size (be careful to choose this size, it must be less
     # than the dimension of the original faces). You can choose if save the image in grayscale or colours.
 
-    #create_csv(input_path="../EmotionDataset/data/ck/CK+/Blocks/eye/", label_path="../EmotionDataset/data/ck/CK+/Emotion/", output_path="../EmotionDataset/data/ck/CK+/Blocks/eye/")
+    create_csv(input_path="../EmotionDataset/data/ck/CK+/Blocks/topnose/", label_path="../EmotionDataset/data/ck/CK+/Emotion/", output_path="../EmotionDataset/data/ck/CK+/Blocks/topnose/")
 
 
     #2- It creates 118 pickle files containing numpy arrays with images and labels.
     # You have to specify the CSV file path created in step 1.
 
-    #create_loo_pickle(csv_path="../EmotionDataset/data/ck/CK+/Blocks/face/prima_label.csv", output_path="./output/face")
+    create_loo_pickle(csv_path="../EmotionDataset/data/ck/CK+/Blocks/topnose/prima_label.csv", output_path="./output/topnose")
 
 
     #3- You can check that everything is fine using this function.
@@ -321,7 +321,7 @@ def main():
     # It prints the emotion labels of the element.
     #element = np.random.randint(2600)
 
-    show_pickle_element(pickle_file="./output/face/ck+_p46.0.pickle", element=2, element_type="test", img_size=32)
+    #show_pickle_element(pickle_file="./output/face/ck+_p46.0.pickle", element=2, element_type="test", img_size=32)
 
 
 if __name__ == "__main__":
