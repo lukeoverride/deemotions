@@ -282,14 +282,16 @@ def main(block_name):
 
             model_output = model(tf_train_dataset, image_size_w, image_size_h, num_channels, conv1_weights, conv1_biases, conv2_weights, conv2_biases,
                                  dense1_weights, dense1_biases, layer_out_weights, layer_out_biases, keep_prob)
-            loss = tf.nn.l2_loss(model_output - tf_train_labels)
+            #mean(sum(squared error))
+            loss = tf.reduce_mean(tf.reduce_sum(tf.square(model_output-tf_train_labels)))
+            #loss = tf.nn.l2_loss(model_output - tf_train_labels)
 
             #La regolarizzazione aggiunge informazioni per prevenire overfitting (Wikipedia)
-            beta = 5e-4
-            loss += (beta * tf.nn.l2_loss(conv1_weights)) 
-            loss += (beta * tf.nn.l2_loss(conv2_weights))
-            loss += (beta * tf.nn.l2_loss(dense1_weights))
-            loss += (beta * tf.nn.l2_loss(layer_out_weights))
+           # beta = 5e-4
+           # loss += (beta * tf.nn.l2_loss(conv1_weights))
+           # loss += (beta * tf.nn.l2_loss(conv2_weights))
+           # loss += (beta * tf.nn.l2_loss(dense1_weights))
+           # loss += (beta * tf.nn.l2_loss(layer_out_weights))
 
             loss_summ = tf.summary.scalar("loss", loss)
 
