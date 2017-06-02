@@ -157,7 +157,7 @@ def model(data, image_size_w, image_size_h, num_channels, conv1_weights, conv1_b
 
     # Fully connected layer 1
     dense1 = tf.reshape(pool2, [-1, dense1_weights.get_shape().as_list()[0]])  # Reshape conv3
-    dense1 = tf.matmul(dense1, dense1_weights) + dense1_biases
+    dense1 = tf.nn.relu(tf.matmul(dense1, dense1_weights) + dense1_biases)
 
     # Output layer
     out = tf.matmul(dense1, layer_out_weights) + layer_out_biases
@@ -356,4 +356,4 @@ def main(block_name):
 
 
 if __name__ == "__main__":
-    main("topnose")
+    main("face")
