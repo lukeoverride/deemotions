@@ -39,6 +39,7 @@ overall_loss = np.ndarray((0,epochs),np.float32)
 overall_accuracy_batch = np.ndarray((0,epochs),np.float32)
 overall_accuracy_valid = np.ndarray((0,epochs),np.float32)
 overall_accuracy_test = np.ndarray(0,np.float32)
+overall_session_time = np.ndarray(0,np.float32)
 
 #row=person, column=epoch
 accuracy_test_sum = 0
@@ -47,8 +48,13 @@ for file in glob.glob("*.txt"):
     pipe = subprocess.Popen('tail '+file+' --lines=1', shell=True, stdout=subprocess.PIPE).stdout
     lastLine = pipe.read()
     tokens = lastLine.split()
-    accuracy_test = tokens[1]
+    session_time = tokens[1]
+    pipe2 = subprocess.Popen('tail -n 3 '+file+' | head -n 1', shell=True, stdout=subprocess.PIPE).stdout
+    accLine = pipe2.read()
+    tokensAcc = accLine.split()
+    accuracy_test = tokensAcc[1]
     overall_accuracy_test = np.append(overall_accuracy_test,np.float32(accuracy_test))
+    overall_session_time = np.append(overall_session_time,np.float32(session_time))
     epochs, losses, accuracy_batch, accuracy_valid = np.loadtxt(file, unpack=True,skiprows=1,delimiter='   ')
     overall_loss = np.append(overall_loss,[losses],axis=0)
     overall_accuracy_batch = np.append(overall_accuracy_batch,[accuracy_batch],axis=0)
@@ -58,7 +64,8 @@ average_loss_per_epoch = np.average(overall_loss,axis=0)
 average_accuracyB_per_epoch = np.average(overall_accuracy_batch,axis=0)
 average_accuracyV_per_epoch = np.average(overall_accuracy_valid,axis=0)
 people = np.arange(0,npeople,1)
-print np.average(overall_accuracy_test)
+print "accuracy test average: "+str(np.average(overall_accuracy_test))
+print "session time average: "+str(np.average(overall_session_time))
 
 plt.subplot(3,1,1)
 plt.plot(epochs,average_loss_per_epoch,'r-')
@@ -73,9 +80,13 @@ plt.plot(epochs,average_accuracyV_per_epoch,'b-')
 plt.xlabel("epochs")
 plt.ylabel("accuracy_validation")
 plt.figure(2)
-plt.subplot(1,1,1)
+plt.subplot(2,1,1)
 #classic histogram
 plt.bar(people, overall_accuracy_test, width=1.0,alpha=0.4,color='c')
 plt.xlabel("subject")
 plt.ylabel("accuracy_test")
+plt.subplot(2,1,2)
+plt.bar(people,overall_session_time, width=1.0,alpha=0.4,color='y')
+plt.xlabel("subject")
+plt.ylabel("session_time (s)")
 plt.show()

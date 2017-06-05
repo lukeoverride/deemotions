@@ -49,6 +49,7 @@ import tensorflow as tf
 from six.moves import cPickle as pickle
 import datetime
 import os,sys,glob
+from timeit import default_timer as timer
 
 def accuracy(predictions, labels, verbose=False):
     '''This function return the accuracy
@@ -174,7 +175,6 @@ def main(block_name):
 
     for pickle_file in glob.glob(sys.argv[1]+block_name+"/*.pickle"):
         subject = pickle_file[len(pickle_file) - 12:len(pickle_file) - 7];
-        #pickle_file = "./output/"+block_name+"/prima_p10.0_out.pickle"
         batch_size = 25
         patch_size = 5 # filter size
         myInitializer = None
@@ -267,8 +267,6 @@ def main(block_name):
             conv2_size_w = (conv1_size_w - patch_size + 1)/2
             conv1_size_h = (image_size_h - patch_size + 1)/2
             conv2_size_h = (conv1_size_h - patch_size + 1)/2
-            #layer_out_weights = tf.Variable(tf.truncated_normal([conv2_size_w * conv2_size_h * 12, num_labels], stddev=0.1), name="outy_w")
-            #layer_out_biases = tf.Variable(tf.zeros([num_labels], name="outy_b"))
 
             dense1_weights = tf.get_variable(name="dense1y_w",shape=[conv2_size_w * conv2_size_h * 12, 256], initializer=myInitializer)
             dense1_biases = tf.Variable(tf.zeros([256], name="dense1y_b"))
@@ -282,16 +280,7 @@ def main(block_name):
 
             model_output = model(tf_train_dataset, image_size_w, image_size_h, num_channels, conv1_weights, conv1_biases, conv2_weights, conv2_biases,
                                  dense1_weights, dense1_biases, layer_out_weights, layer_out_biases, keep_prob)
-            #mean(sum(squared error))
             loss = tf.reduce_mean(tf.reduce_sum(tf.square(model_output-tf_train_labels)))
-            #loss = tf.nn.l2_loss(model_output - tf_train_labels)
-
-            #La regolarizzazione aggiunge informazioni per prevenire overfitting (Wikipedia)
-           # beta = 5e-4
-           # loss += (beta * tf.nn.l2_loss(conv1_weights))
-           # loss += (beta * tf.nn.l2_loss(conv2_weights))
-           # loss += (beta * tf.nn.l2_loss(dense1_weights))
-           # loss += (beta * tf.nn.l2_loss(layer_out_weights))
 
             loss_summ = tf.summary.scalar("loss", loss)
 
@@ -322,6 +311,7 @@ def main(block_name):
                 accuracy_batch = np.ndarray(0,np.float32)
                 accuracy_valid = np.ndarray(0,np.float32)
 
+                start = timer()
                 for epoch in range(total_epochs):
                     batch = create_batch(train_dataset, train_labels_new)
                     batch_data = batch[0]
@@ -336,6 +326,7 @@ def main(block_name):
                     accuracy_batch = np.append(accuracy_batch, accuracy(predictions, batch_labels, False))
                     accuracy_valid = np.append(accuracy_valid, accuracy(valid_prediction.eval(), valid_labels_new, False))
 
+                    '''
                     if (epoch % 50 == 0):
                         print("")
                         print("Loss at epoch: ", epoch, " is " , l)
@@ -345,12 +336,14 @@ def main(block_name):
                         print("Validation size: " + str(valid_labels_new.shape))
                         accuracy(predictions, batch_labels, True)
                         print("")
+                    '''
 
-
+                end = timer()
+                sessionTime = end - start
                 saver.save(session, "./sessions/tensorflow/cnn_arch1_pitch_p"+subject , global_step=epoch)  # save the session
                 accuracy_test = accuracy(test_prediction.eval(),test_labels_new, True)
                 output = np.column_stack((epochs.flatten(), losses.flatten(), accuracy_batch.flatten(), accuracy_valid.flatten()))
-                np.savetxt("./sessions/epochs_log/subject_"+subject+".txt", output, header="epoch    loss    accuracy_batch    accuracy_valid", footer="accuracy_test:\n"+str(accuracy_test), delimiter='   ')
+                np.savetxt("./sessions/epochs_log/subject_"+subject+".txt", output, header="epoch    loss    accuracy_batch    accuracy_valid", footer="accuracy_test:\n"+str(accuracy_test)+"\ntime:\n"+str(sessionTime), delimiter='   ')
                 print("# Test size: " + str(test_labels_new.shape))
 
 
