@@ -81,14 +81,15 @@ class BayesianNetwork:
             where 1=True and 0=False
         """
         labels_dictionary = {}
-        for label in labels_list:
-            if label in self.labels_list:
+        for label in self.labels_list:
+            if label in labels_list:
                 labels_dictionary[label] = 1
             else:
                 labels_dictionary[label] = 0
         infer = VariableElimination(self.model)
-        print(infer.query(['emotion_node'], labels_dictionary) ['emotion_node'])
-        
+        posterior = infer.query(['emotion_node'], labels_dictionary)
+        print(posterior ['emotion_node'])
+        return posterior
         
     def returnLabelsListFromNewImage(self, csv_file_row):
         el_num = 0
