@@ -88,22 +88,17 @@ class BayesianNetwork:
                 labels_dictionary[label] = 0
         infer = VariableElimination(self.model)
         print(infer.query(['emotion_node'], labels_dictionary) ['emotion_node'])
-
-
-
-def main():
-    my_bayes = BayesianNetwork()
-    is_correct = my_bayes.initModel("/home/massimiliano/deemotions/wild/wild_GAF_labels_train_global.csv")
-    print("Model correct: " + str(is_correct))
-
-    my_bayes.inference(['carnival', 'festival'])
-
-
-if __name__ == "__main__":
-    main()
-
-
-
-
+        
+        
+    def returnLabelsListFromNewImage(self, csv_file_row):
+        el_num = 0
+        toReturn = list()
+        for element in csv_file_row:
+            if (el_num > 1):
+                splitters = csv_file_row[el_num].split("'")
+                if (len(splitters) > 1):
+                    toReturn = splitters[1]
+            el_num += 1
+        return toReturn
 
 
