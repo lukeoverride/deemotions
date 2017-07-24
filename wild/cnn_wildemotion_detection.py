@@ -173,9 +173,6 @@ class CnnEmotionDetection:
 
         @param image It is a colour image.
         """
-        #cv2.imshow('img',image)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
         image = image - 127
         image = image / 255
         feed_dict = {self.tf_input_vector : image}

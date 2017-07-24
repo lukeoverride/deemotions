@@ -18,7 +18,8 @@ import cv2  # to visualize a preview
 import csv
 import datetime
 import os
-#os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
 
 def compute_accuracy(predictions, labels, verbose=False):
     '''This function return the accuracy
@@ -55,7 +56,7 @@ def main():
         patch_size = 5
         num_labels = 3
         num_channels = 3  # colour
-        tot_epochs = 10 # Epochs
+        tot_epochs = 1500 # Epochs
         # Change this path based on your datasets location
         pickle_file_positive_train = "./pickles_GAF/GAF_train_positive.pickle"
         pickle_file_negative_train = "./pickles_GAF/GAF_train_negative.pickle"
@@ -122,9 +123,9 @@ def main():
         total_validation_neg = valid_dataset_negative.shape[0]
         total_validation_neu = valid_dataset_neutral.shape[0]
 
-        indices_positive_test = np.random.randint(total_validation_pos, size=100)
-        indices_negative_test = np.random.randint(total_validation_neg, size=100)
-        indices_neutral_test = np.random.randint(total_validation_neu, size=100)
+        indices_positive_test = np.random.randint(total_validation_pos, size=1000)
+        indices_negative_test = np.random.randint(total_validation_neg, size=1000)
+        indices_neutral_test = np.random.randint(total_validation_neu, size=1000)
 
         indices_positive_valid = np.random.randint(total_validation_pos, size=50)
         indices_negative_valid = np.random.randint(total_validation_neg, size=50)
@@ -190,6 +191,7 @@ def main():
         with graph.as_default():
             tf_initializer = None #tf.random_normal_initializer()
             # Input data.
+            tf_input_vector = tf.placeholder(tf.float32, shape=(image_size, image_size, num_channels))
             tf_train_dataset = tf.placeholder(tf.float32, shape=(batch_size, image_size, image_size, num_channels))
             tf_train_labels = tf.placeholder(tf.float32, shape=(batch_size, num_labels))
             tf_valid_dataset = tf.placeholder(tf.float32, shape=(None, image_size, image_size, num_channels))
@@ -275,6 +277,8 @@ def main():
             accuracy_valid = tf.equal(tf.argmax(tf_valid_labels, 1), tf.argmax(valid_prediction, 1))
             accuracy_valid = tf.reduce_mean(tf.cast(accuracy_valid, tf.float32))
             accuracy_valid_summary = tf.summary.scalar("accuracy_valid", accuracy_valid)
+            
+            cnn_emot_output = model(tf_input_vector)
 
             # Optimizer.
             learning_rate = 0.0001
@@ -283,10 +287,10 @@ def main():
             #lrate_summ = tf.scalar_summary("learning rate", learning_rate)
             #optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
             #optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(loss, global_step=global_step)
-            #optimizer = tf.train.RMSPropOptimizer(learning_rate=0.001, decay=0.9, momentum=0.0, epsilon=1e-10, use_locking=False, name='RMSProp').minimize(loss, global_step=global_step)
+            optimizer = tf.train.RMSPropOptimizer(learning_rate=0.001, decay=0.9, momentum=0.0, epsilon=1e-10, use_locking=False, name='RMSProp').minimize(loss, global_step=global_step)
             #optimizer = tf.train.AdagradOptimizer(learning_rate=0.00625).minimize(loss, global_step=global_step)
             #optimizer = tf.train.MomentumOptimizer(learning_rate=0.0001, momentum=0.95).minimize(loss, global_step=global_step)
-            optimizer = tf.train.AdadeltaOptimizer(learning_rate=0.001, rho=0.95, epsilon=1e-08, use_locking=False, name='Adadelta').minimize(loss, global_step=global_step)
+            #optimizer = tf.train.AdadeltaOptimizer(learning_rate=0.001, rho=0.95, epsilon=1e-08, use_locking=False, name='Adadelta').minimize(loss, global_step=global_step)
 
             # Predictions for the training, validation, and test data.
             train_prediction = logits
@@ -334,7 +338,7 @@ def main():
                     _, acc, l, predictions, acc_valid, pred_valid, my_summary = session.run([optimizer, accuracy, loss, train_prediction, accuracy_valid, valid_prediction, merged_summaries],
                                                     feed_dict=feed_dict)
                     writer_summaries.add_summary(my_summary, step)
-                    if (step % 50 == 0):
+                    if (step % 25 == 0):
                         print("")
                         print("Loss at step: ", step, " is " , l)
                         print("Global Step: " + str(global_step.eval()) + " of " + str(tot_epochs))
@@ -342,6 +346,18 @@ def main():
                         print("Minibatch size: " + str(batch_labels.shape))
                         print("Accuracy_train: " + str(acc))
                         print ("Accuracy_valid: " +str(acc_valid))
+                        print ("predictions positive: "+str(predictions[0]))
+                        print ("predictions positive: "+str(predictions[1]))
+                        print ("predictions positive: "+str(predictions[4]))
+                        print ("predictions positive: "+str(predictions[10]))
+                        print ("predictions negative: "+str(predictions[30]))
+                        print ("predictions negative: "+str(predictions[34]))
+                        print ("predictions negative: "+str(predictions[40]))
+                        print ("predictions negative: "+str(predictions[42]))
+                        print ("predictions neutral: "+str(predictions[60]))
+                        print ("predictions neutral: "+str(predictions[52]))
+                        print ("predictions neutral: "+str(predictions[50]))
+                        print ("predictions neutral: "+str(predictions[47]))
                         print("")
 
                 # Save and test the network      
@@ -351,15 +367,11 @@ def main():
                 saver.save(session, checkpoint_path + "/cnn_emotiW_detection" , global_step=step)  # save the session
                 feed_dict = {tf_test_dataset: test_dataset, keep_prob: 1.0}
                 test_pred, test_acc, test_rec, test_prec, test_fp, test_fn = session.run([test_prediction, test_accuracy, test_recall, test_precision, test_false_positives, test_false_negatives], feed_dict=feed_dict)
-
+                
                 #Saving the TEST file names in a list
-                current_element = 0
-                images_positive = 0
-                images_negative = 0
-                images_neutral = 0
                 results = {}
-
-                with open("/home/napster/GAF_2/Val/Positive/Faces/resized/wild_GAF.csv", 'rb') as csvfile:
+                confusion_positive_array = np.zeros(3)
+                with open("./wild_GAF_faces_val_positive.csv", 'rb') as csvfile:
                     reader = csv.reader(csvfile)
                     first_line = 0 #To jump the header line
                     for row in reader:
@@ -367,16 +379,24 @@ def main():
                             tokens = row[0].split("face")
                             completeFileName = tokens[0].split("/")
                             fileName = completeFileName[len(completeFileName)-1]
+                            image = cv2.imread(row[0]).astype(np.float32)
+                            image -= 127.0
+                            image /= 255.0
+                            feed_dict = {tf_input_vector: image}
+                            current_pred = session.run([cnn_emot_output], feed_dict=feed_dict)
+                            confusion_positive_array[np.argmax(current_pred)] += 1
+                            print current_pred
+                            print confusion_positive_array
                             if (fileName in results):
-                                results[fileName] = np.append(results[fileName],[test_pred[current_element]],axis=0)
+                                results[fileName] = np.append(results[fileName],current_pred,axis=0)
                             else:
-                                images_positive += 1
-                                results[fileName] = [test_pred[current_element]]
-                            current_element += 1
-                            if (current_element > 99): break
+                                results[fileName] = current_pred
                         first_line = 1
+                        
+                images_positive = len(results)
 
-                with open("/home/napster/GAF_2/Val/Negative/Faces/resized/wild_GAF.csv", 'rb') as csvfile:
+                confusion_negative_array = np.zeros(3)
+                with open("./wild_GAF_faces_val_negative.csv", 'rb') as csvfile:
                     reader = csv.reader(csvfile)
                     first_line = 0 #To jump the header line
                     for row in reader:
@@ -384,16 +404,24 @@ def main():
                             tokens = row[0].split("face")
                             completeFileName = tokens[0].split("/")
                             fileName = completeFileName[len(completeFileName)-1]
+                            image = cv2.imread(row[0]).astype(np.float32)
+                            image -= 127.0
+                            image /= 255.0
+                            feed_dict = {tf_input_vector: image}
+                            current_pred = session.run([cnn_emot_output], feed_dict=feed_dict)
+                            confusion_negative_array[np.argmax(current_pred)] += 1
+                            print current_pred
+                            print confusion_negative_array
                             if (fileName in results):
-                                results[fileName] = np.append(results[fileName],[test_pred[current_element]],axis=0)
+                                results[fileName] = np.append(results[fileName],current_pred,axis=0)
                             else:
-                                images_negative += 1
-                                results[fileName] = [test_pred[current_element]]
-                            current_element += 1
-                            if (current_element > 199): break
+                                results[fileName] = current_pred
                         first_line = 1
+                        
+                images_negative = len(results)-images_positive
 
-                with open("/home/napster/GAF_2/Val/Neutral/Faces/resized/wild_GAF.csv", 'rb') as csvfile:
+                confusion_neutral_array = np.zeros(3)
+                with open("./wild_GAF_faces_val_neutral.csv", 'rb') as csvfile:
                     reader = csv.reader(csvfile)
                     first_line = 0 #To jump the header line
                     for row in reader:
@@ -401,14 +429,24 @@ def main():
                             tokens = row[0].split("face")
                             completeFileName = tokens[0].split("/")
                             fileName = completeFileName[len(completeFileName)-1]
+                            image = cv2.imread(row[0]).astype(np.float32)
+                            image -= 127.0
+                            image /= 255.0
+                            feed_dict = {tf_input_vector: image}
+                            current_pred = session.run([cnn_emot_output], feed_dict=feed_dict)
+                            confusion_neutral_array[np.argmax(current_pred)] += 1
+                            print current_pred
+                            print confusion_neutral_array
                             if (fileName in results):
-                                results[fileName] = np.append(results[fileName],[test_pred[current_element]],axis=0)
+                                results[fileName] = np.append(results[fileName],current_pred,axis=0)
                             else:
-                                images_neutral += 1
-                                results[fileName] = [test_pred[current_element]]
-                            current_element += 1
-                            if (current_element > 299): break
+                                results[fileName] = current_pred
                         first_line = 1
+                        
+                images_neutral = len(results)-(images_positive+images_negative)
+                print images_positive
+                print images_negative
+                print images_neutral
 
                 for key in results:
                     results[key] = np.mean(results[key], axis=0)
@@ -422,10 +460,14 @@ def main():
                 global_test_label[images_positive:images_positive+images_negative, 2] = 1
                 global_test_label[images_positive+images_negative:images_positive+images_negative+images_neutral, 1] = 1
 
-                print global_test_label
                 results_array = np.asarray(results.values())
+                results_array = results_array.reshape((len(results), 3))
                 compute_accuracy(results_array,global_test_label,True)
-
+                print confusion_positive_array
+                print confusion_negative_array
+                print confusion_neutral_array
+                
+                
                 print("# Tot. images tested: " + str(test_dataset.shape[0]))
                 print("# Test accuracy: " + str(test_acc))
                 print("# Test recall: " + str(test_rec))

@@ -21,13 +21,11 @@ def getEmotionMap(emotion_detector, csv_path):
                 tokens = row[0].split("face")
                 completeFileName = tokens[0].split("/")
                 fileName = completeFileName[len(completeFileName) - 1]
-                image = cv2.imread(row[0])
+                image = cv2.imread(row[0]).astype(np.float32)
                 current_pred = emotion_detector.getEmotionsPredictions(image)
-                print np.argmax(current_pred)
                 if (fileName in emotion_all_faces):
                     emotion_all_faces[fileName] = np.append(emotion_all_faces[fileName], current_pred, axis=0)
                 else:
-                    #images_positive += 1
                     emotion_all_faces[fileName] = current_pred
             first_line = 1
         return emotion_all_faces
@@ -57,8 +55,12 @@ def compute_accuracy(predictions, labels, verbose=False):
     difference = np.absolute(predictions_normalized - labels)
     result = np.sum(difference,axis=1)
     correct = np.sum(result==0).astype(np.float32)
+    predict_positive = np.sum(col==0)
+    predict_negative = np.sum(col==2)
+    predict_neutral = np.sum(col==1)
     if (verbose == True):
         print correct/predictions.shape[0]
+        print [predict_positive,predict_negative,predict_neutral]
     return correct/predictions.shape[0]
 
 
@@ -73,9 +75,9 @@ def main():
     emotion_all_faces_negative = getEmotionMap(emotion_detector, "./wild_GAF_faces_val_negative.csv")
     emotion_all_faces_neutral = getEmotionMap(emotion_detector, "./wild_GAF_faces_val_neutral.csv")
 
-    computeMean(emotion_all_faces_positive)
-    computeMean(emotion_all_faces_negative)
-    computeMean(emotion_all_faces_neutral)
+    emotion_all_faces_positive = computeMean(emotion_all_faces_positive)
+    emotion_all_faces_negative = computeMean(emotion_all_faces_negative)
+    emotion_all_faces_neutral = computeMean(emotion_all_faces_neutral)
 
     print len(emotion_all_faces_positive)
     print len(emotion_all_faces_negative)
@@ -98,16 +100,7 @@ def main():
     compute_accuracy(emotion_all_faces_positive_array, test_label_positive, True)
     compute_accuracy(emotion_all_faces_negative_array, test_label_negative, True)
     compute_accuracy(emotion_all_faces_neutral_array, test_label_neutral, True)
-    '''
-    global_test_label = np.zeros((len(results), num_labels))
-    global_test_label[0:images_positive, 0] = 1
-    global_test_label[images_positive:images_positive + images_negative, 2] = 1
-    global_test_label[images_positive + images_negative:images_positive + images_negative + images_neutral, 1] = 1
-
-    print global_test_label
-    results_array = np.asarray(results.values())
-    compute_accuracy(results_array, global_test_label, True)
-    '''
+    
 
 
 
