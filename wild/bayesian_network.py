@@ -71,6 +71,7 @@ class BayesianNetwork:
         # Associating the CPDs with the network
         #print("Total CPD: " + str(len(cpds_list)))
         #self.model.add_cpds(cpds_list)
+        self.infer = VariableElimination(self.model)
         return self.model.check_model()  # return True if the model is correct
 
 
@@ -86,8 +87,7 @@ class BayesianNetwork:
                 labels_dictionary[label] = 1
             else:
                 labels_dictionary[label] = 0
-        infer = VariableElimination(self.model)
-        posterior = infer.query(['emotion_node'], labels_dictionary)
+        posterior = self.infer.query(['emotion_node'], labels_dictionary)
         print(posterior ['emotion_node'])
         return posterior
         
@@ -98,7 +98,7 @@ class BayesianNetwork:
             if (el_num > 1):
                 splitters = csv_file_row[el_num].split("'")
                 if (len(splitters) > 1):
-                    toReturn = splitters[1]
+                    toReturn.append(splitters[1])
             el_num += 1
         return toReturn
 

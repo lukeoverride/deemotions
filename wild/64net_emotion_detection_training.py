@@ -353,7 +353,6 @@ def main():
                 test_pred, test_acc, test_rec, test_prec, test_fp, test_fn = session.run([test_prediction, test_accuracy, test_recall, test_precision, test_false_positives, test_false_negatives], feed_dict=feed_dict)
 
                 #Saving the TEST file names in a list
-                image_list = list() #TODO forse inutile, controllare
                 current_element = 0
                 images_positive = 0
                 images_negative = 0
@@ -365,7 +364,6 @@ def main():
                     first_line = 0 #To jump the header line
                     for row in reader:
                         if(first_line != 0):
-                            image_list.append(row[0]) #prende la prima colonna come stringa
                             tokens = row[0].split("face")
                             completeFileName = tokens[0].split("/")
                             fileName = completeFileName[len(completeFileName)-1]
@@ -383,7 +381,6 @@ def main():
                     first_line = 0 #To jump the header line
                     for row in reader:
                         if(first_line != 0):
-                            image_list.append(row[0]) #prende la prima colonna come stringa
                             tokens = row[0].split("face")
                             completeFileName = tokens[0].split("/")
                             fileName = completeFileName[len(completeFileName)-1]
@@ -401,7 +398,6 @@ def main():
                     first_line = 0 #To jump the header line
                     for row in reader:
                         if(first_line != 0):
-                            image_list.append(row[0]) #prende la prima colonna come stringa
                             tokens = row[0].split("face")
                             completeFileName = tokens[0].split("/")
                             fileName = completeFileName[len(completeFileName)-1]
