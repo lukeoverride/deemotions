@@ -18,7 +18,7 @@ import cv2  # to visualize a preview
 import csv
 import datetime
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+#os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 
 def compute_accuracy(predictions, labels, verbose=False):
@@ -37,8 +37,12 @@ def compute_accuracy(predictions, labels, verbose=False):
     difference = np.absolute(predictions_normalized - labels)
     result = np.sum(difference,axis=1)
     correct = np.sum(result==0).astype(np.float32)
+    predict_positive = np.sum(col==0)
+    predict_negative = np.sum(col==2)
+    predict_neutral = np.sum(col==1)
     if (verbose == True):
         print correct/predictions.shape[0]
+        print [predict_positive,predict_negative,predict_neutral]
     return correct/predictions.shape[0]
 
 
@@ -123,9 +127,9 @@ def main():
         total_validation_neg = valid_dataset_negative.shape[0]
         total_validation_neu = valid_dataset_neutral.shape[0]
 
-        indices_positive_test = np.random.randint(total_validation_pos, size=1000)
-        indices_negative_test = np.random.randint(total_validation_neg, size=1000)
-        indices_neutral_test = np.random.randint(total_validation_neu, size=1000)
+        indices_positive_test = np.random.randint(total_validation_pos, size=100)
+        indices_negative_test = np.random.randint(total_validation_neg, size=100)
+        indices_neutral_test = np.random.randint(total_validation_neu, size=100)
 
         indices_positive_valid = np.random.randint(total_validation_pos, size=50)
         indices_negative_valid = np.random.randint(total_validation_neg, size=50)
@@ -370,7 +374,6 @@ def main():
                 
                 #Saving the TEST file names in a list
                 results = {}
-                confusion_positive_array = np.zeros(3)
                 with open("./wild_GAF_faces_val_positive.csv", 'rb') as csvfile:
                     reader = csv.reader(csvfile)
                     first_line = 0 #To jump the header line
@@ -384,9 +387,7 @@ def main():
                             image /= 255.0
                             feed_dict = {tf_input_vector: image}
                             current_pred = session.run([cnn_emot_output], feed_dict=feed_dict)
-                            confusion_positive_array[np.argmax(current_pred)] += 1
                             print current_pred
-                            print confusion_positive_array
                             if (fileName in results):
                                 results[fileName] = np.append(results[fileName],current_pred,axis=0)
                             else:
@@ -395,7 +396,6 @@ def main():
                         
                 images_positive = len(results)
 
-                confusion_negative_array = np.zeros(3)
                 with open("./wild_GAF_faces_val_negative.csv", 'rb') as csvfile:
                     reader = csv.reader(csvfile)
                     first_line = 0 #To jump the header line
@@ -409,9 +409,7 @@ def main():
                             image /= 255.0
                             feed_dict = {tf_input_vector: image}
                             current_pred = session.run([cnn_emot_output], feed_dict=feed_dict)
-                            confusion_negative_array[np.argmax(current_pred)] += 1
                             print current_pred
-                            print confusion_negative_array
                             if (fileName in results):
                                 results[fileName] = np.append(results[fileName],current_pred,axis=0)
                             else:
@@ -420,7 +418,6 @@ def main():
                         
                 images_negative = len(results)-images_positive
 
-                confusion_neutral_array = np.zeros(3)
                 with open("./wild_GAF_faces_val_neutral.csv", 'rb') as csvfile:
                     reader = csv.reader(csvfile)
                     first_line = 0 #To jump the header line
@@ -434,9 +431,7 @@ def main():
                             image /= 255.0
                             feed_dict = {tf_input_vector: image}
                             current_pred = session.run([cnn_emot_output], feed_dict=feed_dict)
-                            confusion_neutral_array[np.argmax(current_pred)] += 1
                             print current_pred
-                            print confusion_neutral_array
                             if (fileName in results):
                                 results[fileName] = np.append(results[fileName],current_pred,axis=0)
                             else:
@@ -462,10 +457,9 @@ def main():
 
                 results_array = np.asarray(results.values())
                 results_array = results_array.reshape((len(results), 3))
-                compute_accuracy(results_array,global_test_label,True)
-                print confusion_positive_array
-                print confusion_negative_array
-                print confusion_neutral_array
+                compute_accuracy(results_array[0:images_positive],global_test_label[0:images_positive],True)
+                compute_accuracy(results_array[images_positive:images_positive+images_negative],global_test_label[images_positive:images_positive+images_negative],True)
+                compute_accuracy(results_array[images_positive+images_negative:images_positive+images_negative+images_neutral],global_test_label[images_positive+images_negative:images_positive+images_negative+images_neutral],True)
                 
                 
                 print("# Tot. images tested: " + str(test_dataset.shape[0]))

@@ -5,6 +5,7 @@ os.chdir(sys.argv[1])
 
 for file in glob.glob("*.jpg"):
     if ("," in file):
-        newstr = file.replace(",", "")
-        os.system("mv "+file+" "+newstr)
+        print file
+        #newstr = file.replace(",", "")
+        #os.system("mv "+file+" "+newstr)
 

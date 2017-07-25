@@ -19,6 +19,7 @@
 import argparse
 import numpy as np
 import os,sys,glob
+import io
 
 from google.cloud import vision
 from PIL import Image, ImageDraw
@@ -39,6 +40,18 @@ def detect_face(face_file, max_results=4):
     # [END get_vision_service]
 
     return image.detect_faces()
+
+
+def detect_labels(path):
+    """Detects labels in the file."""
+    vision_client = vision.Client()
+
+    with io.open(path, 'rb') as image_file:
+        content = image_file.read()
+
+    image = vision_client.image(content=content)
+
+    return image.detect_labels()
 
 
 def crop_faces(file_name, image, faces):
