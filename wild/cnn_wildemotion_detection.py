@@ -178,14 +178,11 @@ class CnnEmotionDetection:
         emotion_predictions = self._sess.run([self.cnn_yaw_output], feed_dict=feed_dict)
         return emotion_predictions
 
-
     def getEmotionMap(self, input_path):
-        #os.chdir(input_path)
         emotion_all_faces = {}
-        for fileName in glob.glob(input_path+"*.jpg"):
+        for fileName in glob.glob(input_path + "*.jpg"):
             image = cv2.imread(fileName).astype(np.float32)
             current_pred = self.getEmotionsPredictions(image)
-            #splittare fileName e aggiungere come chiave solo prima di face_
             tokens = fileName.split("face")
             completeFileName = tokens[0].split("/")
             fileName = completeFileName[len(completeFileName) - 1]
@@ -194,7 +191,6 @@ class CnnEmotionDetection:
             else:
                 emotion_all_faces[fileName] = current_pred
         return emotion_all_faces
-
 
     def getMean(self, emotion_map):
         for key in emotion_map:

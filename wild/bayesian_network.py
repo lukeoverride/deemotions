@@ -44,12 +44,33 @@ class BayesianNetwork:
         # Generate the connections between the father and the children
         cpd_emotion_node = TabularCPD(variable='emotion_node', variable_card=3, values=[[0.33,0.33,0.33]])
 
+        confusion_matrix_net_153429 = np.array([[470.0,92.0,198.0],
+                                                [38.0, 336.0, 130.0],
+                                                [46.0, 201.0, 418.0]])
+        confusion_matrix_net_153429[0,:] /= np.sum(confusion_matrix_net_153429[0,:])
+        confusion_matrix_net_153429[1, :] /= np.sum(confusion_matrix_net_153429[1, :])
+        confusion_matrix_net_153429[2, :] /= np.sum(confusion_matrix_net_153429[2, :])
+
+        confusion_matrix_net_171851 = np.array([[583.0,117.0,60.0],
+                                                [65.0, 396.0, 43.0],
+                                                [149.0, 305.0, 211.0]])
+        confusion_matrix_net_171851[0,:] /= np.sum(confusion_matrix_net_171851[0,:])
+        confusion_matrix_net_171851[1, :] /= np.sum(confusion_matrix_net_171851[1, :])
+        confusion_matrix_net_171851[2, :] /= np.sum(confusion_matrix_net_171851[2, :])
+
+
+
+        cpd_cnn_node = TabularCPD(variable='cnn_node', variable_card=3, values=confusion_matrix_net_171851.T,
+                                                                                 evidence=['emotion_node'], evidence_card=[3])
+
         nodes_list = list()
         for label in self.labels_list:
             nodes_list.append(('emotion_node',label))
 
+        nodes_list.append(('emotion_node','cnn_node'))
         self.model = BayesianModel(nodes_list)
         self.model.add_cpds(cpd_emotion_node)
+        self.model.add_cpds(cpd_cnn_node)
 
         cpds_list = list()
         for i in range(len(self.labels_list)):
@@ -101,5 +122,17 @@ class BayesianNetwork:
                     toReturn.append(splitters[1])
             el_num += 1
         return toReturn
+
+    def inferenceWithCNN(self, labels_list, cnn_pred):
+        labels_dictionary = {}
+        for label in self.labels_list:
+            if label in labels_list:
+                labels_dictionary[label] = 1
+            else:
+                labels_dictionary[label] = 0
+        labels_dictionary['cnn_node'] = cnn_pred
+        posterior = self.infer.query(['emotion_node'], labels_dictionary)
+        return posterior
+
 
 

@@ -53,6 +53,5 @@ class GoogleDetector:
 
         labels_list = list()
         for label in labels:
-            print label.description
             labels_list.append(label.description.encode('utf-8'))
         return labels_list

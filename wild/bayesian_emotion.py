@@ -6,8 +6,7 @@ def main():
     my_bayes = BayesianNetwork()
     is_correct = my_bayes.initModel("./wild_GAF_labels_histogram_train_global.csv")
     print("Model correct: " + str(is_correct))
-    targets = ['positive','negative','neutral']
-    
+
     predicted_positive = [0,0,0]
     with open("./wild_GAF_labels_val_positive.csv", 'rb') as csvfile:
         reader = csv.reader(csvfile)

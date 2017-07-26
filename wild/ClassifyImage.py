@@ -5,14 +5,14 @@ import os,sys,glob
 from cnn_wildemotion_detection import CnnEmotionDetection
 from GoogleDetector import GoogleDetector
 from ImagePreprocessing import ImagePreprocessing
+from bayesian_network import BayesianNetwork
 
+def classify_image(test_path, image_path,real_label):
 
-def classify_image(test_path, image_path):
-    #image = cv2.imread(image_path).astype(np.float32)
+    targets = ['Positive','Negative','Neutral']
 
     google_detector = GoogleDetector()
     image_preprocessor = ImagePreprocessing()
-    print image_path
     labels = google_detector.detect_labels(image_path)
 
     with open(image_path, 'rb') as image:
@@ -26,20 +26,43 @@ def classify_image(test_path, image_path):
     emotion_detector = CnnEmotionDetection(sess)
     emotion_detector.load_variables('/home/napster/emotions/wild/checkpoints/emotiW_detection_171851/cnn_emotiW_detection-1499.meta',
                                     '/home/napster/emotions/wild/checkpoints/emotiW_detection_171851/')
-    #chiamare le predictions tu tutte le immagini e avere la media
     emotion_map = emotion_detector.getEmotionMap(test_path+"Scaled/")
-    print emotion_map
     cnn_predictions = emotion_detector.getMean(emotion_map)
 
-    print cnn_predictions
+    my_bayes_net = BayesianNetwork()
+    is_correct = my_bayes_net.initModel("/home/napster/emotions/wild/wild_GAF_labels_histogram_train_global.csv",False)
+    print("Model correct: " + str(is_correct))
+    reverse_index_list = [0,2,1]
+    posterior = my_bayes_net.inferenceWithCNN(labels,reverse_index_list[np.argmax(cnn_predictions)])
+    final_predictions = np.argmax(posterior['emotion_node'].values)
+    bayesian_label = targets[final_predictions]
+
+
+    print image_path
+    print "Real label: ",real_label
+    if (real_label == bayesian_label):
+        print "Bayesian label: ",bayesian_label,
+        print "*"
+    else:
+        print "Bayesian label: ", bayesian_label
+    print "CNN label: ",targets[reverse_index_list[np.argmax(cnn_predictions)]]
     print labels
 
+    return final_predictions
 
 
-def main(test_path):
+
+
+def main(test_path,real_label):
     os.chdir(test_path)
+    predicted_counter = [0,0,0]
     for image_path in sorted(glob.glob("*")):
-        classify_image(test_path, image_path)
+        final_predictions = classify_image(test_path, image_path,real_label)
+        predicted_counter[final_predictions] += 1
+        print predicted_counter
+        print ""
+
+
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1],sys.argv[2])
