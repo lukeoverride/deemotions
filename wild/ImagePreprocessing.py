@@ -11,21 +11,22 @@ class ImagePreprocessing:
         It crops and scales images
     """
 
-    def scale_images(self, input_path, NEW_SIZE):
-
+    def scale_images(self, input_path, NEW_SIZE, image_path):
+        image_path_no_ext = image_path[0:len(image_path) - 4];
         for file in glob.glob(input_path+"*.jpg"):
-            fileTokens = file.split("/")
-            fileName = fileTokens[len(fileTokens)-1]
-            img = cv2.imread(file)
-            high = img.shape[0]
-            width = img.shape[1]
-            # computes scaling factor
-            scaling_factor_y = float(NEW_SIZE / high)
-            scaling_factor_x = float(NEW_SIZE / width)
-            # scales the image
-            res = cv2.resize(img, None, fx=scaling_factor_x, fy=scaling_factor_y, interpolation=cv2.INTER_CUBIC)
-            if not os.path.exists("Scaled/"): os.makedirs("Scaled")
-            cv2.imwrite("Scaled/" + fileName, res)
+            if (image_path_no_ext in file):
+                fileTokens = file.split("/")
+                fileName = fileTokens[len(fileTokens)-1]
+                img = cv2.imread(file)
+                high = img.shape[0]
+                width = img.shape[1]
+                # computes scaling factor
+                scaling_factor_y = float(NEW_SIZE / high)
+                scaling_factor_x = float(NEW_SIZE / width)
+                # scales the image
+                res = cv2.resize(img, None, fx=scaling_factor_x, fy=scaling_factor_y, interpolation=cv2.INTER_CUBIC)
+                if not os.path.exists("Scaled/"): os.makedirs("Scaled")
+                cv2.imwrite("Scaled/" + fileName, res)
 
     def crop_faces(self, file_name, image, faces):
         """Crop faces, then saves each detected face into a separate file.
