@@ -15,17 +15,7 @@ import os.path
 import imp #to check for missing modules
 import glob
 
-#Check if dlib is installed
-try:
-    imp.find_module('dlib')
-    IS_DLIB_INSTALLED = True
-    import dlib
-    print('[DEEPGAZE] face_detection_slindow.py: the dlib library is installed.')
-except ImportError:
-    IS_DLIB_INSTALLED = False
-    print('[DEEPGAZE] face_detection_slindow.py: the dlib library is not installed.')
-
-#Enbale if you need printing utilities
+#Enable if you need printing utilities
 DEBUG = False
 
 
