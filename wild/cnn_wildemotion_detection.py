@@ -182,7 +182,7 @@ class CnnEmotionDetection:
         image_path_no_ext = image_path[0:len(image_path) - 4];
         emotion_all_faces = {}
         for file in glob.glob(input_path + "*.jpg"):
-            if (image_path_no_ext+"_face" in file):
+            if ((image_path_no_ext + "_face" in file) and (file[file.find(image_path_no_ext) - 1] == '/')):
                 image = cv2.imread(file).astype(np.float32)
                 current_pred = self.getEmotionsPredictions(image)
                 tokens = file.split("face")
