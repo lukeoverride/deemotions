@@ -23,12 +23,14 @@ def classify_image(test_path, image_path,real_label, emotion_detector, google_de
     image_preprocessor.scale_images(test_path+"Faces/",64.0, image_path)
     emotion_map = emotion_detector.getEmotionMap(test_path+"Scaled/",image_path)
     cnn_predictions = emotion_detector.getMean(emotion_map)
+    print cnn_predictions
 
     if (len(cnn_predictions) > 0):
         predicted_cnn_index = np.argmax(cnn_predictions.values())
     else:
         predicted_cnn_index = 0
         #TODO call bayesian net without CNN
+    print predicted_cnn_index
     posterior = bayes_net.inferenceWithCNN(labels,reverse_index_list[predicted_cnn_index])
     final_predictions = np.argmax(posterior['emotion_node'].values)
     bayesian_label = targets[final_predictions]
