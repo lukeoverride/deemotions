@@ -60,7 +60,7 @@ class BayesianNetwork:
 
 
 
-        cpd_cnn_node = TabularCPD(variable='cnn_node', variable_card=3, values=confusion_matrix_net_171851.T,
+        cpd_cnn_node = TabularCPD(variable='cnn_node', variable_card=3, values=confusion_matrix_net_153429.T,
                                                                                  evidence=['emotion_node'], evidence_card=[3])
 
         nodes_list = list()

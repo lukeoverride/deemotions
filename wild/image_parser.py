@@ -56,12 +56,12 @@ def create_csv(input_path):
     roll = 0.0
 
     #Write the header
-    fd = open(input_path + 'wild_GAF.csv','w')
+    fd = open('/home/napster/verywild_GAF.csv','w')
     fd.write("path, id, emotion" + "\n")
     fd.close()
 
     splitPath = input_path.split('/')
-    emotionStr = splitPath[len(splitPath)-4]
+    emotionStr = splitPath[len(splitPath)-3]
     
     if (emotionStr == 'Positive'):
         emoCode = np.array([1,0,0])
@@ -74,12 +74,12 @@ def create_csv(input_path):
     id = 0
 
     #Iterate through all the folder specified in the input path
-    for image_path in sorted(glob.glob(input_path+"*.jpg")):
+    for image_path in sorted(glob.glob(input_path+"*")):
         splitted = image_path.split('/')
         image_name = splitted[len(splitted)-1]
         image_no_extension = image_name[0:len(image_name)-4];
         #Write the CSV file
-        fd = open(input_path + 'wild_GAF.csv','a')
+        fd = open('/home/napster/verywild_GAF.csv','a')
         fd.write(image_path + "," + str(int(id)) + "," + str(emoCode) + "\n")
         fd.close()
         id += 1
@@ -216,13 +216,13 @@ def main():
     # Specify an output folder and the image size (be careful to choose this size, it must be less
     # than the dimension of the original faces). You can choose if save the image in grayscale or colours.
 
-    #create_csv(input_path=sys.argv[1])
+    create_csv(input_path=sys.argv[1])
 
 
     #2- It creates 118 pickle files containing numpy arrays with images and labels.
     # You have to specify the CSV file path created in step 1.
 
-    create_loo_pickle(csv_path=sys.argv[1]+"wild_GAF.csv", output_path=sys.argv[1])
+    #create_loo_pickle(csv_path=sys.argv[1]+"wild_GAF.csv", output_path=sys.argv[1])
 
 
     #3- You can check that everything is fine using this function.

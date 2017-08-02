@@ -16,6 +16,7 @@ def getEmotionMap(emotion_detector, csv_path):
     with open(csv_path, 'rb') as csvfile:
         reader = csv.reader(csvfile)
         first_line = 0  # To jump the header line
+        nuovo = 0
         for row in reader:
             if (first_line != 0):
                 tokens = row[0].split("face")
@@ -26,8 +27,10 @@ def getEmotionMap(emotion_detector, csv_path):
                 if (fileName in emotion_all_faces):
                     emotion_all_faces[fileName] = np.append(emotion_all_faces[fileName], current_pred, axis=0)
                 else:
+                    nuovo += 1
                     emotion_all_faces[fileName] = current_pred
             first_line = 1
+        print nuovo
         return emotion_all_faces
 
 def computeMean(emotion_map):
@@ -71,9 +74,9 @@ def main():
     emotion_detector.load_variables('./checkpoints/emotiW_detection_171851/cnn_emotiW_detection-1499.meta',
                                  './checkpoints/emotiW_detection_171851/')
 
-    emotion_all_faces_positive = getEmotionMap(emotion_detector,"./wild_GAF_faces_val_positive.csv")
-    emotion_all_faces_negative = getEmotionMap(emotion_detector, "./wild_GAF_faces_val_negative.csv")
-    emotion_all_faces_neutral = getEmotionMap(emotion_detector, "./wild_GAF_faces_val_neutral.csv")
+    emotion_all_faces_positive = getEmotionMap(emotion_detector,"./wild_GAF_faces_val_positive_all.csv")
+    emotion_all_faces_negative = getEmotionMap(emotion_detector, "./wild_GAF_faces_val_negative_all.csv")
+    emotion_all_faces_neutral = getEmotionMap(emotion_detector, "./wild_GAF_faces_val_neutral_all.csv")
 
     emotion_all_faces_positive = computeMean(emotion_all_faces_positive)
     emotion_all_faces_negative = computeMean(emotion_all_faces_negative)
