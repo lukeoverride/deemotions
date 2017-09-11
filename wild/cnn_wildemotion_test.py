@@ -1,3 +1,29 @@
+'''
+    Copyright (C) 2017 Luca Surace - University of Calabria, Plymouth University
+    
+    This file is part of Deemotions. Deemotions is an Emotion Recognition System
+    based on Deep Learning method.
+
+    Deemotions is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Deemotions is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Deemotions.  If not, see <http://www.gnu.org/licenses/>.
+    
+    -----------------------------------------------------------------------
+
+    This code returns a map containing, for each image, the average of all faces emotions value.
+    It uses the CSV files generated from GAF dataset.
+
+'''
+
 import tensorflow as tf
 import cv2
 from cnn_wildemotion_detection import CnnEmotionDetection
@@ -7,10 +33,7 @@ import sys
 from six.moves import cPickle as pickle
 import csv
 
-'''
-Returns a map containing, for each image, the average of all faces emotions value
 
-'''
 def getEmotionMap(emotion_detector, csv_path):
     emotion_all_faces = {}
     with open(csv_path, 'rb') as csvfile:
@@ -25,6 +48,7 @@ def getEmotionMap(emotion_detector, csv_path):
                 image = cv2.imread(row[0]).astype(np.float32)
                 current_pred = emotion_detector.getEmotionsPredictions(image)
                 if (fileName in emotion_all_faces):
+                    nuovo += 1
                     emotion_all_faces[fileName] = np.append(emotion_all_faces[fileName], current_pred, axis=0)
                 else:
                     nuovo += 1
@@ -71,8 +95,8 @@ def main():
 
     sess = tf.Session()
     emotion_detector = CnnEmotionDetection(sess)
-    emotion_detector.load_variables('./checkpoints/emotiW_detection_171851/cnn_emotiW_detection-1499.meta',
-                                 './checkpoints/emotiW_detection_171851/')
+    emotion_detector.load_variables('./checkpoints/emotiW_detection_153429/cnn_emotiW_detection-1499.meta',
+                                 './checkpoints/emotiW_detection_153429/')
 
     emotion_all_faces_positive = getEmotionMap(emotion_detector,"./wild_GAF_faces_val_positive_all.csv")
     emotion_all_faces_negative = getEmotionMap(emotion_detector, "./wild_GAF_faces_val_negative_all.csv")

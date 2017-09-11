@@ -2,7 +2,6 @@
 
 '''
     Copyright (C) 2017 Luca Surace - University of Calabria, Plymouth University
-                  2016 Massimiliano Patacchiola, Plymouth University
     
     This file is part of Deemotions. Deemotions is an Emotion Recognition System
     based on Deep Learning method.
@@ -22,15 +21,8 @@
     
     -----------------------------------------------------------------------
     
-    It contains three functions that allow creating a CSV file .
-    It can generate 118 pickle files for the leave-one-out (Jack Knife)
-    cross-validation test on unknown subjects. 
-    To use the file you have to insert the right paths in the main function.
-
-    Requirements: 
-    OpenCV (sudo apt-get install libopencv-dev python-opencv) 
-    Numpy (sudo pip install numpy)
-    Six (sudo pip install six)
+    This code generates pickle files from GAF pictures. These files are used
+    later in the process to load images in the CNN.
 
 '''
 
