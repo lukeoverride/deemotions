@@ -1,4 +1,4 @@
-##Deemotions
+# Deemotions
 
 This repository contains the implementation of the method illustrated in [1].
 
@@ -80,9 +80,6 @@ Example:
 `python ClassifyImage.py /home/yourUsername/images/negativeInstances/ Negative`
 
 `python ClassifyImage.py /home/yourUsername/images/neutralInstances/ Neutral`
-
-Note: The repository contains the weights of two CNN. If you want to use different weights, you need to change the path in the code of "ClassifyImage.py".
-
 
 **Training**
 
