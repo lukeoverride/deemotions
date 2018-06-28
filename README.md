@@ -1,4 +1,4 @@
-#Deemotions
+##Deemotions
 
 This repository contains the implementation of the method illustrated in [1].
 
@@ -58,7 +58,7 @@ sudo pip install tensorflow
 [Google Cloud Vision API] (https://cloud.google.com/vision/) - **Please note you need a Google Cloud account to import the python modules and run the code**
 [Pgmpy] (http://pgmpy.org/)
 
-## Installation
+### Installation
 
 Download the repository from [[here]](https://github.com/lukeoverride/deemotions/archive/master.zip) or clone it using git:
 
@@ -76,13 +76,15 @@ To run the code, please type on a terminal:
 Example:
 
 `python ClassifyImage.py /home/yourUsername/images/positiveInstances/ Positive`
+
 `python ClassifyImage.py /home/yourUsername/images/negativeInstances/ Negative`
+
 `python ClassifyImage.py /home/yourUsername/images/neutralInstances/ Neutral`
 
 Note: The repository contains the weights of two CNN. If you want to use different weights, you need to change the path in the code of "ClassifyImage.py".
 
 
-### Training
+**Training**
 
 The code used to train the model is available in ./wild/64net_emotion_detection_training.py for demonstration purposes only. 
 
