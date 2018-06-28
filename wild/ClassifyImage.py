@@ -92,10 +92,10 @@ def main(test_path,real_label):
     sess = tf.Session()
     emotion_detector = CnnEmotionDetection(sess)
     emotion_detector.load_variables(
-        '/home/napster/emotions/wild/checkpoints/emotiW_detection_153429/cnn_emotiW_detection-1499.meta',
-        '/home/napster/emotions/wild/checkpoints/emotiW_detection_153429/')
+        './checkpoints/emotiW_detection_153429/cnn_emotiW_detection-1499.meta',
+        './checkpoints/emotiW_detection_153429/')
     my_bayes_net = BayesianNetwork()
-    is_correct = my_bayes_net.initModel("/home/napster/emotions/wild/wild_GAF_labels_histogram_train_global.csv", False)
+    is_correct = my_bayes_net.initModel("./wild_GAF_labels_histogram_train_global.csv", False)
     print("Model correct: " + str(is_correct))
 
     predicted_counter = [0,0,0]
