@@ -32,35 +32,36 @@ Cite:
 
 ## Contributors
 
-[Luca Surace](https://cassiophong.wordpress.com/)
+- [Luca Surace](https://cassiophong.wordpress.com/)
 
-[Massimiliano Patacchiola](http://mpatacchiola.github.io)
+- [Massimiliano Patacchiola](http://mpatacchiola.github.io)
 
 ## Instructions
 
 
 ### Dependences
 
-[Numpy](http://www.numpy.org/)
+- [Numpy](http://www.numpy.org/)
 
 ```shell
 sudo pip install numpy
 ```
 
-[OpenCV](https://opencv.org/)
+- [OpenCV](https://opencv.org/)
 
 ```shell
 sudo apt-get install libopencv-dev python-opencv
 ```
 
-[TensorFlow](https://www.tensorflow.org/)
+- [TensorFlow](https://www.tensorflow.org/)
 
 ```shell
 sudo pip install tensorflow
 ```
 
-[Google Cloud Vision API](https://cloud.google.com/vision/) - **Please note you need a Google Cloud account to import the python modules and run the code**
-[Pgmpy](http://pgmpy.org/)
+- [Google Cloud Vision API](https://cloud.google.com/vision/) - **Please note you need a Google Cloud account to import the python modules and run the code**
+
+- [Pgmpy](http://pgmpy.org/)
 
 ### Installation
 
