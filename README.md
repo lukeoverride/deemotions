@@ -1,6 +1,9 @@
 # Deemotions
 
-This repository contains the implementation of the method illustrated in [1].
+This repository contains the implementation of the method illustrated in:
+
+[**Emotion Recognition in the Wild using Deep Neural Networks and Bayesian Classifiers**] (https://arxiv.org/abs/1709.03820) 
+
 
 ## Preamble
 
@@ -30,7 +33,8 @@ Cite:
 ## Contributors
 
 [Luca Surace] (https://cassiophong.wordpress.com/)
-[Massimiliano Patacchiola] (mpatacchiola.github.io)
+
+[Massimiliano Patacchiola] (http://mpatacchiola.github.io)
 
 ## Instructions
 
