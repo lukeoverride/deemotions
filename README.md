@@ -2,14 +2,14 @@
 
 This repository contains the implementation of the method illustrated in:
 
-[**Emotion Recognition in the Wild using Deep Neural Networks and Bayesian Classifiers**] (https://arxiv.org/abs/1709.03820) 
+[**Emotion Recognition in the Wild using Deep Neural Networks and Bayesian Classifiers**](https://arxiv.org/abs/1709.03820) 
 
 
 ## Preamble
 
 This repository contains the code to perform emotion recognition both for the following datasets:
-1) Emotion Recognition based on CK+ dataset [CK+ dataset] (https://ieeexplore.ieee.org/document/5543262/)
-2) GAF (Group Affect Dataset) associated with [EmotiW Challenge 2017] [https://sites.google.com/site/emotiwchallenge/]
+1) Emotion Recognition based on [CK+ dataset](https://ieeexplore.ieee.org/document/5543262/)
+2) GAF (Group Affect Dataset) associated with [EmotiW Challenge 2017](https://sites.google.com/site/emotiwchallenge/)
 and for the GAF dataset. 
 
 The source files for this work are contained _into the "wild"_ folder (it is so funny, isn't it?).
@@ -32,35 +32,35 @@ Cite:
 
 ## Contributors
 
-[Luca Surace] (https://cassiophong.wordpress.com/)
+[Luca Surace](https://cassiophong.wordpress.com/)
 
-[Massimiliano Patacchiola] (http://mpatacchiola.github.io)
+[Massimiliano Patacchiola](http://mpatacchiola.github.io)
 
 ## Instructions
 
 
 ### Dependences
 
-[Numpy] (http://www.numpy.org/)
+[Numpy](http://www.numpy.org/)
 
 ```shell
 sudo pip install numpy
 ```
 
-[OpenCV] (https://opencv.org/)
+[OpenCV](https://opencv.org/)
 
 ```shell
 sudo apt-get install libopencv-dev python-opencv
 ```
 
-[TensorFlow] (https://www.tensorflow.org/)
+[TensorFlow](https://www.tensorflow.org/)
 
 ```shell
 sudo pip install tensorflow
 ```
 
-[Google Cloud Vision API] (https://cloud.google.com/vision/) - **Please note you need a Google Cloud account to import the python modules and run the code**
-[Pgmpy] (http://pgmpy.org/)
+[Google Cloud Vision API](https://cloud.google.com/vision/) - **Please note you need a Google Cloud account to import the python modules and run the code**
+[Pgmpy](http://pgmpy.org/)
 
 ### Installation
 
